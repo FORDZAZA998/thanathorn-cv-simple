@@ -380,8 +380,54 @@
         // Reusable Geometries
         const coreGeo = new THREE.IcosahedronGeometry(2, 2);
         const ringGeo = new THREE.TorusGeometry(3.5, 0.05, 16, 64);
-        const sparkGeo = new THREE.BufferGeometry();
-        // A simple particle system geometry setup will be created per reactor
+
+        // ==============================================
+        // 2.5. KLAKMATH (JS PORT)
+        // ==============================================
+        // Based on keijiro/KlakMath concepts: Stateless Tweening & Noise
+        const KlakMath = {
+            CdsTween: {
+                step: function (state, target, speed, dt) {
+                    const n1 = state.v - (state.x - target) * (speed * speed * dt);
+                    const n2 = 1 + speed * dt;
+                    const nv = n1 / (n2 * n2);
+                    return { x: state.x + nv * dt, v: nv };
+                },
+                stepColor: function (state, target, speed, dt) {
+                    const r = this.step({ x: state.r, v: state.vr }, target.r, speed, dt);
+                    const g = this.step({ x: state.g, v: state.vg }, target.g, speed, dt);
+                    const b = this.step({ x: state.b, v: state.vb }, target.b, speed, dt);
+                    return { r: r.x, g: g.x, b: b.x, vr: r.v, vg: g.v, vb: b.v };
+                }
+            },
+            Noise: {
+                hash: function (n) {
+                    n = Math.imul(n ^ (n >>> 15), 0x735a2d97);
+                    n = Math.imul(n ^ (n >>> 15), 0xc4ceb9fe);
+                    n ^= n >>> 16;
+                    return ((n >>> 0) / 4294967295.0) * 2.0 - 1.0;
+                },
+                float: function (p, seed = 0) {
+                    const i = Math.floor(p);
+                    const x = p - i;
+                    let k0 = x, k1 = 1 - x;
+                    k0 = 1 - k0 * k0; k0 = k0 * k0 * k0;
+                    k1 = 1 - k1 * k1; k1 = k1 * k1 * k1;
+                    const g0 = this.hash(i + seed * 997);
+                    const g1 = this.hash(i + 1 + seed * 997);
+                    const n = k0 * g0 * x + k1 * g1 * (x - 1);
+                    return n * (2 * 32 / 27);
+                },
+                fractal: function (p, octaves, seed = 0) {
+                    let f = 0.0, w = 1.0;
+                    for (let i = 0; i < octaves; i++) {
+                        f += w * this.float(p, seed + i * 13);
+                        p *= 2.0; w *= 0.5;
+                    }
+                    return f;
+                }
+            }
+        };
 
         function createReactor(id, initialData) {
             const group = new THREE.Group();
@@ -435,6 +481,7 @@
             // Label (HTML overlay synced to 3D position is better, but simple sprite text works)
             // For performance and aesthetics, we rely on the HUD, but when clicked, camera moves here.
 
+            const targetC = new THREE.Color(colorData.hex);
             group.userData = {
                 id: id,
                 core: core,
@@ -442,9 +489,12 @@
                 ring1: ring1,
                 ring2: ring2,
                 light: light,
-                targetColor: new THREE.Color(colorData.hex),
+                targetColor: targetC,
+                colorState: { r: targetC.r, g: targetC.g, b: targetC.b, vr: 0, vg: 0, vb: 0 },
                 targetIntensity: colorData.intensity,
-                pm25: initialData.pm25
+                intensityState: { x: colorData.intensity, v: 0 },
+                pm25: initialData.pm25,
+                seed: count * 137 // Deterministic seed for PRNG
             };
 
             scene.add(group);
@@ -612,31 +662,47 @@
             // Animate Reactors
             Object.values(reactors).forEach(r => {
                 const u = r.userData;
-                // Smooth color transition
-                r.children[0].material.color.lerp(u.targetColor, 0.05);
-                r.children[0].material.emissive.copy(r.children[0].material.color);
 
-                const curIntensity = r.children[4].intensity; // Light
-                r.children[4].intensity += (u.targetIntensity * 2 - curIntensity) * 0.1;
+                // 1. Smooth CdsTween color transition
+                u.colorState = KlakMath.CdsTween.stepColor(u.colorState, u.targetColor, 5.0, dt);
+                const currColor = new THREE.Color(
+                    Math.max(0, u.colorState.r),
+                    Math.max(0, u.colorState.g),
+                    Math.max(0, u.colorState.b)
+                );
+                r.children[0].material.color.copy(currColor);
+                r.children[0].material.emissive.copy(currColor);
+
+                // 2. Smooth CdsTween intensity transition
+                u.intensityState = KlakMath.CdsTween.step(u.intensityState, u.targetIntensity, 5.0, dt);
+                const currIntensity = Math.max(0, u.intensityState.x);
+
+                // 3. Add high-frequency KlakMath Fractal Noise for light flickering
+                const flicker = KlakMath.Noise.fractal(elapsed * 10 + u.seed, 2) * (currIntensity * 0.3);
+                r.children[4].intensity = (currIntensity * 2) + flicker; // Point Light
+                r.children[0].material.emissiveIntensity = (currIntensity * 0.4) + (flicker * 0.1); // Core glow
 
                 // Calculate rotation speed based on PM2.5 intensity (faster = more polluted)
                 const baseSpeed = 0.5;
-                const speed = baseSpeed * u.targetIntensity;
+                const speed = baseSpeed * currIntensity;
 
-                // Core rotation
-                u.core.rotation.x += dt * speed;
-                u.core.rotation.y += dt * speed * 1.2;
+                // 4. Core rotation with KlakMath Noise stutter
+                const stutter = KlakMath.Noise.float(elapsed * 2 + u.seed) * 0.5;
+                u.core.rotation.x += dt * speed * (1 + stutter);
+                u.core.rotation.y += dt * speed * 1.2 * (1 + stutter);
 
-                // Solid core pulsing
-                const s = 1 + Math.sin(elapsed * Math.PI * speed) * 0.1;
+                // 5. Solid core organic pulsing with noise
+                const pulseNoise = KlakMath.Noise.float(elapsed * 4 + u.seed);
+                const s = 1 + (Math.sin(elapsed * Math.PI * speed) * 0.05) + (pulseNoise * 0.08 * currIntensity);
                 u.solid.scale.set(s, s, s);
 
                 // Rings rotation
                 u.ring1.rotation.y += dt * speed * -1.5;
                 u.ring2.rotation.x += dt * speed * 2;
 
-                // Float up and down
-                r.position.y = Math.sin(elapsed * 2 + r.position.x) * 1.5;
+                // 6. Float up and down using 3-octave KlakMath Fractal Noise
+                const floatOffset = KlakMath.Noise.fractal(elapsed * 0.4 + u.seed, 3) * 4.0;
+                r.position.y = floatOffset;
             });
 
             controls.update();
