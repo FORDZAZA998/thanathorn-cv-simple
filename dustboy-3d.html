@@ -369,9 +369,9 @@
         scene.add(gridLines);
 
         // Global Lighting
-        scene.add(new THREE.AmbientLight(0x445566, 8.0)); // Boosted ambient light drastically
+        scene.add(new THREE.AmbientLight(0x223344, 1.5)); // Soft dark ambient
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 6.0); // Boosted directional light
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.5); // Moderate directional light
         dirLight.position.set(20, 50, 20);
         scene.add(dirLight);
 
