@@ -4,114 +4,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV: ธนาธร จึงรุ่งเรืองกิจ - Version 2</title>
-    <!-- Simple Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>⚡ The Oracle Hub — 3D Cyber-Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS พื้นฐานแบบเข้าใจง่าย สำหรับนักเรียน */
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            line-height: 1.6;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        body {
+            background-color: #020205;
+            color: #fff;
+            font-family: 'Sarabun', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            /* Hide scrollbars for 3D canvas */
         }
 
-        .header {
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Glassmorphism UI Overlay */
+        #hud-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            /* allow clicking through to 3D if needed, but we re-enable it on children */
+        }
+
+        .header-box {
+            background: rgba(10, 15, 25, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px 48px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.05);
             text-align: center;
-            border-bottom: 2px solid #FF5A00;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .profile-img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #FF5A00;
+            margin-bottom: 40px;
+            pointer-events: auto;
+            transform: translateY(-20px);
+            animation: float 4s ease-in-out infinite;
         }
 
         h1 {
-            color: #FF5A00;
-            margin: 10px 0 5px 0;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00ffff, #0088ff, #ff00ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
         }
 
-        h2 {
-            color: #cc4800;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-            margin-top: 30px;
-        }
-
-        .info-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-list li {
-            margin-bottom: 10px;
-        }
-
-        .job {
-            margin-bottom: 20px;
-        }
-
-        .job h3 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-
-        .job p.date {
-            color: #777;
-            font-size: 0.9em;
-            margin: 0 0 10px 0;
-        }
-
-        .print-btn {
-            display: block;
-            width: 200px;
-            margin: 30px auto 0;
-            padding: 10px;
-            background-color: #FF5A00;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
+        .subtitle {
             font-size: 16px;
-            cursor: pointer;
+            color: #88aaff;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Cards Grid */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            width: 90%;
+            pointer-events: auto;
+        }
+
+        .portal-card {
+            background: rgba(15, 20, 35, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            text-decoration: none;
+            color: #fff;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .print-btn:hover {
-            background-color: #cc4800;
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
         }
 
-        /* ลบเงากับปุ่มตอนสั่งพิมพ์เพื่อให้ดูเรียบร้อย */
-        @media print {
-            body {
-                background: #fff;
-                padding: 0;
+        .portal-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 255, 255, 0.2);
+            background: rgba(25, 30, 50, 0.8);
+        }
+
+        .portal-card:hover::before {
+            left: 200%;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        /* Theming per card on hover */
+        .card-dustboy:hover {
+            border-color: #00ff66;
+            box-shadow: 0 15px 35px rgba(0, 255, 102, 0.2);
+        }
+
+        .card-train:hover {
+            border-color: #ffaa00;
+            box-shadow: 0 15px 35px rgba(255, 170, 0, 0.2);
+        }
+
+        .card-map:hover {
+            border-color: #00aaff;
+            box-shadow: 0 15px 35px rgba(0, 170, 255, 0.2);
+        }
+
+        .card-cv:hover {
+            border-color: #ff55aa;
+            box-shadow: 0 15px 35px rgba(255, 85, 170, 0.2);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(-20px);
             }
 
-            .container {
-                box-shadow: none;
-                padding: 0;
-                border: none;
+            50% {
+                transform: translateY(-30px);
             }
 
-            .print-btn {
-                display: none;
+            100% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .oracle-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            pointer-events: none;
+            letter-spacing: 1px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .header-box {
+                padding: 16px 24px;
+                margin-bottom: 24px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .portal-card {
+                padding: 20px;
+            }
+
+            .card-icon {
+                font-size: 36px;
+                margin-bottom: 12px;
             }
         }
     </style>
@@ -119,72 +228,193 @@
 
 <body>
 
-    <div class="container">
-        <!-- ส่วนหัว (Header) -->
-        <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Thanathorn_Juangroongruangkit_at_a_meeting_of_the_House_of_Representatives%2C_25_May_2019.jpg"
-                alt="ธนาธร จึงรุ่งเรืองกิจ" class="profile-img">
-            <h1>ธนาธร จึงรุ่งเรืองกิจ</h1>
-            <p>ผู้นำทางจิตวิญญาณแห่งขบวนการก้าวหน้า | อดีตผู้บริหารไทยซัมมิทกรุ๊ป</p>
+    <div id="canvas-container"></div>
+
+    <div id="hud-container">
+        <div class="header-box">
+            <h1>THE SYSTEM PORTAL</h1>
+            <div class="subtitle">PSRU 2026 Interactive Web Experiments</div>
         </div>
 
-        <!-- ข้อมูลส่วนตัวและการติดต่อ -->
-        <h2>ข้อมูลเบื้องต้น</h2>
-        <ul class="info-list">
-            <li><strong>วันเกิด:</strong> 25 พฤศจิกายน 2521 (อายุ 47 ปี)</li>
-            <li><strong>แนวคิดทางการเมือง:</strong> เสรีนิยมก้าวหน้า</li>
-            <li><strong>งานอดิเรก:</strong> กีฬาอัลตรามาราธอน, ปีนเขา, อ่านวรรณกรรมสะท้อนสังคม</li>
-        </ul>
+        <div class="portal-grid">
+            <!-- DustBoy -->
+            <a href="dustboy-3d.html" class="portal-card card-dustboy">
+                <span class="card-icon">⚡</span>
+                <div class="card-title">DustBoy 3D Reactor</div>
+                <div class="card-desc">Live PM2.5 visualization using MQTT streams and procedurally generated floating
+                    energy spheres.</div>
+            </a>
 
-        <!-- การศึกษา -->
-        <h2>ประวัติการศึกษา</h2>
-        <div class="job">
-            <h3>ปริญญาโท 3 สาขา</h3>
-            <ul class="info-list">
-                <li><strong>กฎหมายธุรกิจระหว่างประเทศ:</strong> มหาวิทยาลัยซังต์กัลเลิน (สวิตเซอร์แลนด์)</li>
-                <li><strong>การเงินโลก (Global Finance):</strong> ม.นิวยอร์ก และ ม.วิทยาศาสตร์ฯ ฮ่องกง</li>
-                <li><strong>เศรษฐศาสตร์การเมือง:</strong> จุฬาลงกรณ์มหาวิทยาลัย</li>
-            </ul>
-            <h3>ปริญญาตรี</h3>
-            <p><strong>วิศวกรรมเครื่องกล:</strong> มหาวิทยาลัยธรรมศาสตร์ และ มหาวิทยาลัยนอตทิงแฮม</p>
+            <!-- 3D Train -->
+            <a href="travel-3d.html" class="portal-card card-train">
+                <span class="card-icon">🚄</span>
+                <div class="card-title">3D Train Network</div>
+                <div class="card-desc">Interactive 3D locomotive navigating through a procedurally generated mountain
+                    landscape and forest.</div>
+            </a>
+
+            <!-- 2D Map -->
+            <a href="travel-map.html" class="portal-card card-map">
+                <span class="card-icon">🗺️</span>
+                <div class="card-title">Interactive 2D Map</div>
+                <div class="card-desc">Leaflet.js map plotting real GPS tracks over dark-themed CartoDB map tiles with
+                    animated waypoints.</div>
+            </a>
+
+            <!-- CV -->
+            <a href="cv.html" class="portal-card card-cv">
+                <span class="card-icon">👤</span>
+                <div class="card-title">Personal Profile CV</div>
+                <div class="card-desc">Standard clean HTML/CSS vitae detailing executive experience and progressive
+                    political ideology.</div>
+            </a>
         </div>
-
-        <!-- ประสบการณ์การทำงาน -->
-        <h2>เส้นทางการทำงานและการเมือง</h2>
-
-        <div class="job">
-            <h3>ผู้ช่วยหาเสียง / ผู้นำทางความคิด</h3>
-            <p class="date">คณะก้าวหน้า (พ.ศ. 2563 - ปัจจุบัน)</p>
-            <ul>
-                <li>จัดตั้ง "Common School" เพื่อเป็นสถาบันทางความคิดให้แก่เยาวชนพรรคและสังคม</li>
-                <li>ขับเคลื่อนนโยบายการเมืองท้องถิ่น และนำพรรคประชาชน (ปชน.) ชนะเลือกตั้ง ส.ส. กรุงเทพฯ แบบเบ็ดเสร็จในปี
-                    2569</li>
-                <li>ผลักดันนโยบาย 3 เสาหลัก: ปฏิรูปกองทัพ, กระจายอำนาจ (Unlock Local), รัฐสวัสดิการ</li>
-            </ul>
-        </div>
-
-        <div class="job">
-            <h3>หัวหน้าพรรค / สมาชิกสภาผู้แทนราษฎร</h3>
-            <p class="date">พรรคอนาคตใหม่ (พ.ศ. 2561 - 2563)</p>
-            <ul>
-                <li>คว้าเสียงกว่า 6 ล้านเสียง (81 ที่นั่ง) ในการเลือกตั้ง 2562 ภายในเวลาเพียง 1 ปีหลังก่อตั้งพรรค</li>
-                <li>เผชิญคดีนิติสงคราม ทำให้พ้นสภาพ ส.ส. และถูกตัดสิทธิทางการเมือง 10 ปี (ถึง พ.ศ. 2573)</li>
-            </ul>
-        </div>
-
-        <div class="job">
-            <h3>รองประธานกรรมการบริหาร</h3>
-            <p class="date">ไทยซัมมิท กรุ๊ป (พ.ศ. 2545 - 2561)</p>
-            <ul>
-                <li>บริหารองค์กรผลิตชิ้นส่วนยานยนต์ระดับประเทศตั้งแต่อายุ 23 ปี</li>
-                <li>เพิ่มยอดขายรายปีทะลุ 80,000 ล้านบาท พร้อมผลกำไรสูงสุดเป็นประวัติการณ์</li>
-            </ul>
-        </div>
-
-        <!-- ปุ่ม Print -->
-        <button class="print-btn" onclick="window.print()">พิมพ์ CV</button>
     </div>
 
+    <div class="oracle-footer">
+        🤖 สร้างและปกป้องโดย <strong>Antigravity Oracle</strong> — The Unseen Force
+    </div>
+
+    <!-- Importmap for Three.js -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ==============================================
+        // 1. THREE.JS SCENE SETUP
+        // ==============================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020205, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.set(0, 0, 0); // We will fly the camera forward
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // ==============================================
+        // 2. CYBERPUNK TUNNEL GENERATION
+        // ==============================================
+
+        // Let's create a vast wireframe tube we fly through
+        const tunnelPath = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3(0, 0, -200),
+            new THREE.Vector3(50, 20, -400),
+            new THREE.Vector3(-50, -20, -600),
+            new THREE.Vector3(0, 0, -800)
+        ]);
+
+        const tubeGeo = new THREE.TubeGeometry(tunnelPath, 100, 20, 16, false);
+        const edges = new THREE.EdgesGeometry(tubeGeo);
+
+        const lineMat = new THREE.LineBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.15
+        });
+        const tunnel = new THREE.LineSegments(edges, lineMat);
+        scene.add(tunnel);
+
+        // Add Data Particles flying towards us
+        const particleCount = 2000;
+        const particleGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        const speedArray = new Float32Array(particleCount);
+
+        for (let i = 0; i < particleCount; i++) {
+            posArray[i * 3] = (Math.random() - 0.5) * 100; // x
+            posArray[i * 3 + 1] = (Math.random() - 0.5) * 100; // y
+            posArray[i * 3 + 2] = -Math.random() * 800; // z (depth)
+
+            speedArray[i] = Math.random() * 2 + 1; // z-speed
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particleGeo.setAttribute('velocity', new THREE.BufferAttribute(speedArray, 1));
+
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.5,
+            color: 0x00aaff,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+
+        const starBox = new THREE.Points(particleGeo, particleMat);
+        scene.add(starBox);
+
+        // ==============================================
+        // 3. ANIMATION LOOP
+        // ==============================================
+        const clock = new THREE.Clock();
+        let flyingOffset = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+
+            // 1. Move camera through the tunnel
+            flyingOffset += dt * 30; // Flying speed
+            if (flyingOffset > 800) flyingOffset = 0; // Loop back
+
+            // Move camera
+            camera.position.z = -flyingOffset;
+
+            // Add slight bobbing effect for drama
+            camera.position.x = Math.sin(flyingOffset * 0.02) * 2;
+            camera.position.y = Math.cos(flyingOffset * 0.015) * 2;
+
+            // 2. Animate Data Particles
+            const positions = starBox.geometry.attributes.position.array;
+            const velocities = starBox.geometry.attributes.velocity.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                // Move particle closer to screen (positive Z)
+                positions[i * 3 + 2] += velocities[i] * dt * 50;
+
+                // If particle flies past the camera's current Z, reset it deep into the tunnel
+                if (positions[i * 3 + 2] > camera.position.z + 10) {
+                    positions[i * 3 + 2] = camera.position.z - 800;
+                    // Randomize newly spawned x/y slightly near center
+                    positions[i * 3] = (Math.random() - 0.5) * 60;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
+                }
+            }
+            starBox.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Responsive resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Mouse Parallax Effect on Cards Grid
+        document.addEventListener('mousemove', (e) => {
+            const grid = document.querySelector('.portal-grid');
+            const x = (e.clientX / window.innerWidth - 0.5) * 20; // max 20px tilt
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            grid.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${-y}deg)`;
+        });
+
+    </script>
 </body>
 
 </html>
