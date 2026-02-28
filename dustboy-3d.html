@@ -320,10 +320,10 @@
 
         // AQI Logic Helper
         function getAQIColor(pm25) {
-            if (pm25 <= 25) return { hex: 0x00ff66, css: 'pm-good', name: 'Good', intensity: 1.0 };
-            if (pm25 <= 50) return { hex: 0xffcc00, css: 'pm-mod', name: 'Moderate', intensity: 1.5 };
-            if (pm25 <= 100) return { hex: 0xff5500, css: 'pm-unh', name: 'Unhealthy', intensity: 2.0 };
-            return { hex: 0xff0055, css: 'pm-haz', name: 'Hazardous', intensity: 3.0 };
+            if (pm25 <= 25) return { hex: 0x00ffaa, css: 'pm-good', name: 'Good', intensity: 1.5 }; // Bright Neon Cyan/Green
+            if (pm25 <= 50) return { hex: 0xffea00, css: 'pm-mod', name: 'Moderate', intensity: 2.0 }; // Intense Yellow
+            if (pm25 <= 100) return { hex: 0xff4400, css: 'pm-unh', name: 'Unhealthy', intensity: 2.5 }; // Deep Orange
+            return { hex: 0xff0033, css: 'pm-haz', name: 'Hazardous', intensity: 3.5 }; // Vivid Crimson
         }
 
         // ==============================================
@@ -369,9 +369,9 @@
         scene.add(gridLines);
 
         // Global Lighting
-        scene.add(new THREE.AmbientLight(0x223344, 4.0)); // Doubled ambient light
+        scene.add(new THREE.AmbientLight(0x445566, 8.0)); // Boosted ambient light drastically
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 3.0); // Doubled directional light
+        const dirLight = new THREE.DirectionalLight(0xffffff, 6.0); // Boosted directional light
         dirLight.position.set(20, 50, 20);
         scene.add(dirLight);
 
