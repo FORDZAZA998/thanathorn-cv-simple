@@ -439,12 +439,12 @@
             const radius = 10 + count * 2;
             group.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
 
-            // The Inner Core
+            // The Inner Core (Wireframe) - Keep Standard so it reflects a bit of light organically
             const colorData = getAQIColor(initialData.pm25);
             const coreMat = new THREE.MeshStandardMaterial({
                 color: colorData.hex,
                 emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity * 1.5,
+                emissiveIntensity: 1.0,
                 roughness: 0.2,
                 metalness: 0.8,
                 wireframe: true
@@ -452,23 +452,20 @@
             const core = new THREE.Mesh(coreGeo, coreMat);
             group.add(core);
 
-            // Inner Core Solid Pulse
-            const solidMat = new THREE.MeshStandardMaterial({
-                color: colorData.hex,      // Fixed: Was hardcoded to white, causing washed out colors
-                emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity * 4.0, // High distinct glow
-                roughness: 0.1
+            // Inner Core Solid Pulse - Make this completely immune to dark lighting
+            const solidMat = new THREE.MeshBasicMaterial({
+                color: colorData.hex,
+                transparent: true,
+                opacity: Math.min(1.0, 0.4 + (colorData.intensity * 0.2)) // Higher intensity = higher opacity
             });
-            const solidCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 1), solidMat);
+            const solidCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 2), solidMat);
             group.add(solidCore);
 
-            // Energy Rings
-            const ringMat = new THREE.MeshStandardMaterial({
+            // Energy Rings - Basic material guarantees neon rings always show up
+            const ringMat = new THREE.MeshBasicMaterial({
                 color: colorData.hex,
-                emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity * 3.0,
                 transparent: true,
-                opacity: 0.9
+                opacity: 0.8
             });
             const ring1 = new THREE.Mesh(ringGeo, ringMat);
             const ring2 = new THREE.Mesh(ringGeo, ringMat);
