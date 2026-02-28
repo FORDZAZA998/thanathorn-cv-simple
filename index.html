@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ The Oracle Hub — 3D Cyber-Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>THE ORACLE ✦ Interactive Portfolio Hub</title>
+    <!-- Premium Fonts: Montserrat for headers, Inter for UI, Sarabun for Thai fallback -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700&family=Inter:wght@300;400;500&family=Sarabun:wght@300;400&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,11 +17,13 @@
         }
 
         body {
-            background-color: #020205;
-            color: #fff;
-            font-family: 'Sarabun', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', 'Sarabun', sans-serif;
             overflow: hidden;
-            /* Hide scrollbars for 3D canvas */
+            /* Hide scrollbars for full-screen canvas */
+            cursor: crosshair;
+            /* Techy cursor */
         }
 
         #canvas-container {
@@ -28,9 +33,11 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
+            /* Background gradient overlay to make text pop */
+            background: radial-gradient(circle at center, transparent 0%, #020205 100%);
         }
 
-        /* Glassmorphism UI Overlay */
+        /* UI Overlay */
         #hud-container {
             position: absolute;
             top: 0;
@@ -43,159 +50,239 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
-            /* allow clicking through to 3D if needed, but we re-enable it on children */
+            /* Let mouse interact with 3D canvas */
         }
 
-        .header-box {
-            background: rgba(10, 15, 25, 0.4);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 24px 48px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.05);
+        /* Elegant Header */
+        .header-wrap {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             pointer-events: auto;
-            transform: translateY(-20px);
-            animation: float 4s ease-in-out infinite;
+            /* Re-enable clicks */
+            animation: fadeInDown 1.5s ease-out;
         }
 
         h1 {
-            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 42px;
+            font-weight: 200;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        h1 strong {
             font-weight: 700;
-            background: linear-gradient(90deg, #00ffff, #0088ff, #ff00ff);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
         }
 
         .subtitle {
-            font-size: 16px;
-            color: #88aaff;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
             font-weight: 300;
-            letter-spacing: 1px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
-        /* Cards Grid */
+        /* Premium Glassmorphism Grid */
         .portal-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            max-width: 900px;
+            gap: 30px;
+            max-width: 960px;
             width: 90%;
             pointer-events: auto;
+            /* Re-enable for links */
+            perspective: 1000px;
         }
 
         .portal-card {
-            background: rgba(15, 20, 35, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            /* Sharp, modern corners */
+            padding: 40px 30px;
             text-decoration: none;
             color: #fff;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            align-items: flex-start;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease-out backwards;
         }
 
+        /* Staggered load animation */
+        .portal-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .portal-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .portal-card:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .portal-card:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+
+        /* Elegance Hover Effect */
         .portal-card::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 50%;
+            left: 0;
+            width: 4px;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: skewX(-20deg);
-            transition: 0.5s;
+            background: #ffffff;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0.5;
         }
 
         .portal-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: rgba(0, 255, 255, 0.5);
-            box-shadow: 0 15px 35px rgba(0, 255, 255, 0.2);
-            background: rgba(25, 30, 50, 0.8);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px) translateZ(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 255, 255, 0.05);
         }
 
         .portal-card:hover::before {
-            left: 200%;
+            transform: scaleY(1);
+        }
+
+        /* Card Themes */
+        .card-dustboy:hover::before {
+            background: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+        }
+
+        .card-dustboy:hover .card-icon {
+            color: #00ff88;
+            text-shadow: 0 0 15px #00ff88;
+        }
+
+        .card-train:hover::before {
+            background: #ffaa00;
+            box-shadow: 0 0 15px #ffaa00;
+        }
+
+        .card-train:hover .card-icon {
+            color: #ffaa00;
+            text-shadow: 0 0 15px #ffaa00;
+        }
+
+        .card-map:hover::before {
+            background: #0088ff;
+            box-shadow: 0 0 15px #0088ff;
+        }
+
+        .card-map:hover .card-icon {
+            color: #0088ff;
+            text-shadow: 0 0 15px #0088ff;
+        }
+
+        .card-cv:hover::before {
+            background: #ff3366;
+            box-shadow: 0 0 15px #ff3366;
+        }
+
+        .card-cv:hover .card-icon {
+            color: #ff3366;
+            text-shadow: 0 0 15px #ff3366;
         }
 
         .card-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
+            font-size: 32px;
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.4s ease;
         }
 
         .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            color: #ffffff;
         }
 
         .card-desc {
             font-size: 13px;
-            color: #aaa;
-            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            font-weight: 300;
         }
 
-        /* Theming per card on hover */
-        .card-dustboy:hover {
-            border-color: #00ff66;
-            box-shadow: 0 15px 35px rgba(0, 255, 102, 0.2);
-        }
-
-        .card-train:hover {
-            border-color: #ffaa00;
-            box-shadow: 0 15px 35px rgba(255, 170, 0, 0.2);
-        }
-
-        .card-map:hover {
-            border-color: #00aaff;
-            box-shadow: 0 15px 35px rgba(0, 170, 255, 0.2);
-        }
-
-        .card-cv:hover {
-            border-color: #ff55aa;
-            box-shadow: 0 15px 35px rgba(255, 85, 170, 0.2);
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(-20px);
-            }
-
-            50% {
-                transform: translateY(-30px);
-            }
-
-            100% {
-                transform: translateY(-20px);
-            }
+        /* Geometric Accents on Cards */
+        .card-accent {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 10px;
+            font-family: monospace;
+            color: rgba(255, 255, 255, 0.2);
         }
 
         .oracle-footer {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 0;
             width: 100%;
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
+            font-family: monospace;
             color: rgba(255, 255, 255, 0.3);
             z-index: 10;
             pointer-events: none;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            animation: fadeIn 2s ease-in 1s backwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Mobile Responsive */
@@ -205,22 +292,22 @@
                 gap: 16px;
             }
 
-            .header-box {
-                padding: 16px 24px;
-                margin-bottom: 24px;
+            .header-wrap {
+                margin-bottom: 30px;
             }
 
             h1 {
-                font-size: 28px;
+                font-size: 24px;
+                letter-spacing: 4px;
             }
 
             .portal-card {
-                padding: 20px;
+                padding: 24px;
             }
 
             .card-icon {
-                font-size: 36px;
-                margin-bottom: 12px;
+                font-size: 24px;
+                margin-bottom: 16px;
             }
         }
     </style>
@@ -228,51 +315,57 @@
 
 <body>
 
+    <!-- 3D Background Container -->
     <div id="canvas-container"></div>
 
+    <!-- UI Overlay -->
     <div id="hud-container">
-        <div class="header-box">
-            <h1>THE SYSTEM PORTAL</h1>
-            <div class="subtitle">PSRU 2026 Interactive Web Experiments</div>
+        <div class="header-wrap">
+            <h1>THE <strong>ORACLE</strong></h1>
+            <div class="subtitle">Creative Technology & Analytics Hub — PSRU</div>
         </div>
 
         <div class="portal-grid">
             <!-- DustBoy -->
             <a href="dustboy-3d.html" class="portal-card card-dustboy">
+                <span class="card-accent">[SYS.01]</span>
                 <span class="card-icon">⚡</span>
-                <div class="card-title">DustBoy 3D Reactor</div>
-                <div class="card-desc">Live PM2.5 visualization using MQTT streams and procedurally generated floating
-                    energy spheres.</div>
+                <div class="card-title">DustBoy Reactor</div>
+                <div class="card-desc">Real-time PM2.5 visualization dashboard powered by live MQTT data streams and
+                    procedural KlakMath organic algorithms.</div>
             </a>
 
             <!-- 3D Train -->
             <a href="travel-3d.html" class="portal-card card-train">
+                <span class="card-accent">[SYS.02]</span>
                 <span class="card-icon">🚄</span>
-                <div class="card-title">3D Train Network</div>
-                <div class="card-desc">Interactive 3D locomotive navigating through a procedurally generated mountain
-                    landscape and forest.</div>
+                <div class="card-title">Locomotive Engine</div>
+                <div class="card-desc">Interactive Three.js environment featuring a moving train traversing an
+                    expansive, procedurally sculpted morning landscape.</div>
             </a>
 
             <!-- 2D Map -->
             <a href="travel-map.html" class="portal-card card-map">
+                <span class="card-accent">[SYS.03]</span>
                 <span class="card-icon">🗺️</span>
-                <div class="card-title">Interactive 2D Map</div>
-                <div class="card-desc">Leaflet.js map plotting real GPS tracks over dark-themed CartoDB map tiles with
-                    animated waypoints.</div>
+                <div class="card-title">Geospatial Array</div>
+                <div class="card-desc">Dark-mode CartoDB map system built on Leaflet.js, mapping deep GPS telemetry data
+                    with animated vector tracking.</div>
             </a>
 
             <!-- CV -->
             <a href="cv.html" class="portal-card card-cv">
+                <span class="card-accent">[SYS.00]</span>
                 <span class="card-icon">👤</span>
-                <div class="card-title">Personal Profile CV</div>
-                <div class="card-desc">Standard clean HTML/CSS vitae detailing executive experience and progressive
-                    political ideology.</div>
+                <div class="card-title">Executive Profile</div>
+                <div class="card-desc">Detailed curriculum vitae standardizing executive, political, and academic
+                    histories into a printable data manifest.</div>
             </a>
         </div>
     </div>
 
     <div class="oracle-footer">
-        🤖 สร้างและปกป้องโดย <strong>Antigravity Oracle</strong> — The Unseen Force
+        POWERED BY ANTIGRAVITY ORACLE // THE UNSEEN FORCE
     </div>
 
     <!-- Importmap for Three.js -->
@@ -285,114 +378,270 @@
     }
     </script>
 
+    <!-- Main Logic -->
     <script type="module">
         import * as THREE from 'three';
 
         // ==============================================
-        // 1. THREE.JS SCENE SETUP
+        // 1. SCENE SETUP
         // ==============================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x020205, 0.002);
+        // Subtle fog to blend distant particles into the background
+        scene.fog = new THREE.FogExp2(0x050508, 0.0015);
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-        camera.position.set(0, 0, 0); // We will fly the camera forward
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
+        camera.position.z = 800;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
         container.appendChild(renderer.domElement);
 
         // ==============================================
-        // 2. CYBERPUNK TUNNEL GENERATION
+        // 2. CONSTELLATION PARTICLES & LINES
         // ==============================================
 
-        // Let's create a vast wireframe tube we fly through
-        const tunnelPath = new THREE.CatmullRomCurve3([
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(0, 0, -200),
-            new THREE.Vector3(50, 20, -400),
-            new THREE.Vector3(-50, -20, -600),
-            new THREE.Vector3(0, 0, -800)
-        ]);
+        // Settings
+        const particleCount = 600;
+        const maxDistance = 120; // Distance max to draw a line between particles
+        const interactionRadius = 200; // Radius of mouse interaction field
 
-        const tubeGeo = new THREE.TubeGeometry(tunnelPath, 100, 20, 16, false);
-        const edges = new THREE.EdgesGeometry(tubeGeo);
+        // Geometries
+        const particlesData = [];
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
 
-        const lineMat = new THREE.LineBasicMaterial({
-            color: 0x00ffff,
+        const pMaterial = new THREE.PointsMaterial({
+            color: 0x88bbff,
+            size: 4,
+            blending: THREE.AdditiveBlending,
             transparent: true,
-            opacity: 0.15
+            sizeAttenuation: true,
+            opacity: 0.8
         });
-        const tunnel = new THREE.LineSegments(edges, lineMat);
-        scene.add(tunnel);
 
-        // Add Data Particles flying towards us
-        const particleCount = 2000;
-        const particleGeo = new THREE.BufferGeometry();
-        const posArray = new Float32Array(particleCount * 3);
-        const speedArray = new Float32Array(particleCount);
-
+        // Setup individual particles
         for (let i = 0; i < particleCount; i++) {
-            posArray[i * 3] = (Math.random() - 0.5) * 100; // x
-            posArray[i * 3 + 1] = (Math.random() - 0.5) * 100; // y
-            posArray[i * 3 + 2] = -Math.random() * 800; // z (depth)
+            // Distribute in a sphere-like cloud, denser at center
+            const x = (Math.random() - 0.5) * 1600;
+            const y = (Math.random() - 0.5) * 1200;
+            const z = (Math.random() - 0.5) * 1200;
 
-            speedArray[i] = Math.random() * 2 + 1; // z-speed
+            positions[i * 3] = x;
+            positions[i * 3 + 1] = y;
+            positions[i * 3 + 2] = z;
+
+            // Save velocity and home position for organic movement
+            particlesData.push({
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.5,
+                    (Math.random() - 0.5) * 0.5,
+                    (Math.random() - 0.5) * 0.5
+                ),
+                numConnections: 0,
+                baseX: x,
+                baseY: y,
+                baseZ: z
+            });
         }
 
-        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        particleGeo.setAttribute('velocity', new THREE.BufferAttribute(speedArray, 1));
+        const particleGeo = new THREE.BufferGeometry();
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleSystem = new THREE.Points(particleGeo, pMaterial);
+        scene.add(particleSystem);
 
-        const particleMat = new THREE.PointsMaterial({
-            size: 0.5,
-            color: 0x00aaff,
+        // Lines Geometry (pre-allocate maximum possible lines for performance)
+        const lineGeo = new THREE.BufferGeometry();
+        // formula for max lines: n * (n-1) / 2 ... but we only link nearby, so we allocate a safe chunk
+        const linesPositions = new Float32Array(particleCount * particleCount * 3);
+        const linesColors = new Float32Array(particleCount * particleCount * 3);
+
+        // We will update these attributes dynamically every frame
+        lineGeo.setAttribute('position', new THREE.BufferAttribute(linesPositions, 3).setUsage(THREE.DynamicDrawUsage));
+        lineGeo.setAttribute('color', new THREE.BufferAttribute(linesColors, 3).setUsage(THREE.DynamicDrawUsage));
+
+        const lineMat = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
             transparent: true,
-            opacity: 0.6,
-            blending: THREE.AdditiveBlending
+            opacity: 0.3
         });
 
-        const starBox = new THREE.Points(particleGeo, particleMat);
-        scene.add(starBox);
+        const linesMesh = new THREE.LineSegments(lineGeo, lineMat);
+        scene.add(linesMesh);
+
+        // Group to hold the constellation so we can gently rotate it whole
+        const group = new THREE.Group();
+        group.add(particleSystem);
+        group.add(linesMesh);
+        scene.add(group);
+
+        // Add a subtle blue glow light at center
+        const centerLight = new THREE.PointLight(0x0055ff, 3, 1000);
+        scene.add(centerLight);
 
         // ==============================================
-        // 3. ANIMATION LOOP
+        // 3. MOUSE INTERACTION SETUP
         // ==============================================
-        const clock = new THREE.Clock();
-        let flyingOffset = 0;
+        const mouse = new THREE.Vector2(-1000, -1000); // Start off-screen
+        let isMouseMoving = false;
+        let mouseTimeout = null;
+
+        // Create a 3D intersection plane at z=0 to map 2D mouse to 3D space
+        const raycaster = new THREE.Raycaster();
+        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const mousePoint3D = new THREE.Vector3();
+
+        document.addEventListener('mousemove', (event) => {
+            // Update 2D normalized mouse coordinates for 3D translation
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            isMouseMoving = true;
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => { isMouseMoving = false; }, 2000);
+
+            // Parallax effect for the UI Grid
+            const grid = document.querySelector('.portal-grid');
+            const tiltX = (event.clientX / window.innerWidth - 0.5) * 10;
+            const tiltY = (event.clientY / window.innerHeight - 0.5) * 10;
+            grid.style.transform = `rotateY(${tiltX}deg) rotateX(${-tiltY}deg)`;
+        }, false);
+
+        window.addEventListener('mouseout', () => {
+            mouse.x = -1000; mouse.y = -1000;
+        });
+
+        // ==============================================
+        // 4. ANIMATION LOOP
+        // ==============================================
 
         function animate() {
             requestAnimationFrame(animate);
-            const dt = clock.getDelta();
 
-            // 1. Move camera through the tunnel
-            flyingOffset += dt * 30; // Flying speed
-            if (flyingOffset > 800) flyingOffset = 0; // Loop back
+            // Gently rotate the whole group
+            group.rotation.y += 0.001;
+            group.rotation.x += 0.0005;
 
-            // Move camera
-            camera.position.z = -flyingOffset;
+            // Map mouse to 3D point
+            raycaster.setFromCamera(mouse, camera);
+            raycaster.ray.intersectPlane(plane, mousePoint3D);
 
-            // Add slight bobbing effect for drama
-            camera.position.x = Math.sin(flyingOffset * 0.02) * 2;
-            camera.position.y = Math.cos(flyingOffset * 0.015) * 2;
+            let vertexpos = 0;
+            let colorpos = 0;
+            let numConnected = 0;
 
-            // 2. Animate Data Particles
-            const positions = starBox.geometry.attributes.position.array;
-            const velocities = starBox.geometry.attributes.velocity.array;
+            const posArray = particleGeo.attributes.position.array;
 
+            // Reset connections count
             for (let i = 0; i < particleCount; i++) {
-                // Move particle closer to screen (positive Z)
-                positions[i * 3 + 2] += velocities[i] * dt * 50;
+                particlesData[i].numConnections = 0;
+            }
 
-                // If particle flies past the camera's current Z, reset it deep into the tunnel
-                if (positions[i * 3 + 2] > camera.position.z + 10) {
-                    positions[i * 3 + 2] = camera.position.z - 800;
-                    // Randomize newly spawned x/y slightly near center
-                    positions[i * 3] = (Math.random() - 0.5) * 60;
-                    positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
+            // Update particle positions
+            for (let i = 0; i < particleCount; i++) {
+                // Get current data
+                const particleData = particlesData[i];
+
+                // Add velocity to position
+                posArray[i * 3] += particleData.velocity.x;
+                posArray[i * 3 + 1] += particleData.velocity.y;
+                posArray[i * 3 + 2] += particleData.velocity.z;
+
+                // Create a current vector representation to do math
+                const pPos = new THREE.Vector3(posArray[i * 3], posArray[i * 3 + 1], posArray[i * 3 + 2]);
+
+                // Bounce off invisible boundaries (bounding box)
+                if (posArray[i * 3] < -800 || posArray[i * 3] > 800) particleData.velocity.x = -particleData.velocity.x;
+                if (posArray[i * 3 + 1] < -600 || posArray[i * 3 + 1] > 600) particleData.velocity.y = -particleData.velocity.y;
+                if (posArray[i * 3 + 2] < -600 || posArray[i * 3 + 2] > 600) particleData.velocity.z = -particleData.velocity.z;
+
+                // --- MOUSE INTERACTION (REPEL & ATTRACT) ---
+                // Calculate distance from this particle to the 3D mouse point (accounting for group rotation)
+                // Convert mousePoint to local group space
+                const localMouse = mousePoint3D.clone();
+                group.worldToLocal(localMouse);
+
+                const distToMouse = pPos.distanceTo(localMouse);
+
+                // If mouse is near, apply a gentle repelling force or draw connections
+                if (distToMouse < interactionRadius && isMouseMoving) {
+                    const repelForce = new THREE.Vector3().subVectors(pPos, localMouse).normalize();
+                    repelForce.multiplyScalar(0.8 * (1 - distToMouse / interactionRadius));
+                    particleData.velocity.add(repelForce);
+
+                    // Clamp velocity so they don't explode infinitely
+                    particleData.velocity.clampLength(0, 2);
+                } else {
+                    // Slowly return velocity to base normal speeds
+                    particleData.velocity.lerp(new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.5,
+                        (Math.random() - 0.5) * 0.5,
+                        (Math.random() - 0.5) * 0.5
+                    ), 0.01);
+                }
+
+                // --- LINE DRAWING (NODE EDGES) ---
+                // Only check particles *after* the current one to avoid drawing double lines
+                for (let j = i + 1; j < particleCount; j++) {
+                    const particleDataB = particlesData[j];
+
+                    const dx = posArray[i * 3] - posArray[j * 3];
+                    const dy = posArray[i * 3 + 1] - posArray[j * 3 + 1];
+                    const dz = posArray[i * 3 + 2] - posArray[j * 3 + 2];
+                    const distSq = dx * dx + dy * dy + dz * dz;
+
+                    // If close enough, draw a line
+                    if (distSq < maxDistance * maxDistance) {
+                        particleData.numConnections++;
+                        particleDataB.numConnections++;
+
+                        // Calculate alpha based on distance (closer = more opaque)
+                        const alpha = 1.0 - Math.sqrt(distSq) / maxDistance;
+
+                        // Start Point
+                        linesPositions[vertexpos++] = posArray[i * 3];
+                        linesPositions[vertexpos++] = posArray[i * 3 + 1];
+                        linesPositions[vertexpos++] = posArray[i * 3 + 2];
+
+                        // End Point
+                        linesPositions[vertexpos++] = posArray[j * 3];
+                        linesPositions[vertexpos++] = posArray[j * 3 + 1];
+                        linesPositions[vertexpos++] = posArray[j * 3 + 2];
+
+                        // Base Color (Blueish-cyan) multiplied by distance alpha
+                        const r = 0.2 * alpha;
+                        const g = 0.6 * alpha;
+                        const b = 1.0 * alpha;
+
+                        // Start Color
+                        linesColors[colorpos++] = r;
+                        linesColors[colorpos++] = g;
+                        linesColors[colorpos++] = b;
+
+                        // End Color
+                        linesColors[colorpos++] = r;
+                        linesColors[colorpos++] = g;
+                        linesColors[colorpos++] = b;
+
+                        numConnected++;
+                    }
                 }
             }
-            starBox.geometry.attributes.position.needsUpdate = true;
+
+            particleGeo.attributes.position.needsUpdate = true;
+
+            // Tell ThreeJS exactly how many lines to draw this frame
+            linesMesh.geometry.setDrawRange(0, numConnected * 2);
+            linesMesh.geometry.attributes.position.needsUpdate = true;
+            linesMesh.geometry.attributes.color.needsUpdate = true;
+
+            // Optional: slight camera float
+            const time = Date.now() * 0.0001;
+            camera.position.x = Math.sin(time) * 100;
+            camera.position.y = Math.cos(time) * 50;
+            camera.lookAt(scene.position);
 
             renderer.render(scene, camera);
         }
@@ -404,14 +653,6 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Mouse Parallax Effect on Cards Grid
-        document.addEventListener('mousemove', (e) => {
-            const grid = document.querySelector('.portal-grid');
-            const x = (e.clientX / window.innerWidth - 0.5) * 20; // max 20px tilt
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            grid.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${-y}deg)`;
         });
 
     </script>
