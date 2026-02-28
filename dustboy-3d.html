@@ -454,9 +454,9 @@
 
             // Inner Core Solid Pulse
             const solidMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff, // Max bright base color
+                color: colorData.hex,      // Fixed: Was hardcoded to white, causing washed out colors
                 emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity * 2.0, // High glow
+                emissiveIntensity: colorData.intensity * 4.0, // High distinct glow
                 roughness: 0.1
             });
             const solidCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 1), solidMat);
@@ -466,7 +466,9 @@
             const ringMat = new THREE.MeshStandardMaterial({
                 color: colorData.hex,
                 emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity,
+                emissiveIntensity: colorData.intensity * 3.0,
+                transparent: true,
+                opacity: 0.9
             });
             const ring1 = new THREE.Mesh(ringGeo, ringMat);
             const ring2 = new THREE.Mesh(ringGeo, ringMat);
