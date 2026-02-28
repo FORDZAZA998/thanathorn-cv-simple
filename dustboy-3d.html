@@ -368,7 +368,11 @@
         scene.add(gridLines);
 
         // Global Lighting
-        scene.add(new THREE.AmbientLight(0x111122));
+        scene.add(new THREE.AmbientLight(0x223344, 2.0)); // Increased ambient light
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.5); // Added directional light
+        dirLight.position.set(20, 50, 20);
+        scene.add(dirLight);
 
         // Core Reactor Storage (3D Meshes)
         const reactors = {}; // N-xxx -> THREE.Group
@@ -403,9 +407,9 @@
 
             // Inner Core Solid Pulse
             const solidMat = new THREE.MeshStandardMaterial({
-                color: 0x000000,
+                color: 0x444444, // Brighter base color
                 emissive: colorData.hex,
-                emissiveIntensity: colorData.intensity * 0.2,
+                emissiveIntensity: colorData.intensity * 0.4, // Increased glow
                 roughness: 0.1
             });
             const solidCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 1), solidMat);
