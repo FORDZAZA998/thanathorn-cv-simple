@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ DustBoy 3D Reactor — Live Air Quality</title>
+    <!-- MQTT JS -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #05050a;
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            /* Hide scrollbars for 3D canvas */
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Glassmorphism UI */
+        #hud-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(10, 15, 25, 0.7);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px 24px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #88aaff;
+            margin-bottom: 12px;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(0, 255, 100, 0.1);
+            color: #00ff66;
+            border: 1px solid rgba(0, 255, 100, 0.3);
+        }
+
+        .status-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00ff66;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 8px #00ff66;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: rgba(255, 50, 50, 0.1);
+            color: #ff3333;
+            border-color: rgba(255, 50, 50, 0.3);
+        }
+
+        .status-indicator.offline .dot {
+            background-color: #ff3333;
+            box-shadow: 0 0 8px #ff3333;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(0, 255, 100, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 255, 100, 0);
+            }
+        }
+
+        /* Right Panel: Node List */
+        #node-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            bottom: 60px;
+            width: 320px;
+            z-index: 10;
+            background: rgba(10, 15, 25, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            color: #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #node-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        /* Node Card */
+        .node-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .node-card.active {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .node-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .node-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 20px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-lbl {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .pm-good {
+            color: #00ff66;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+
+        .pm-mod {
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+        }
+
+        .pm-unh {
+            color: #ff5500;
+            text-shadow: 0 0 10px rgba(255, 85, 0, 0.4);
+        }
+
+        .pm-haz {
+            color: #ff0055;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+        }
+
+        .time-ago {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .oracle-footer {
+            position: absolute;
+            bottom: 16px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .oracle-footer a {
+            color: #00ffff;
+            text-decoration: none;
+            pointer-events: auto;
+        }
+
+        .oracle-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            #node-panel {
+                top: auto;
+                left: 10px;
+                right: 10px;
+                bottom: 40px;
+                width: auto;
+                height: 30vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="hud-top">
+        <h1>⚡ DustBoy 3D Reactor</h1>
+        <div class="subtitle">Global Real-time PM2.5 Network</div>
+        <div id="conn-status" class="status-indicator">
+            <div class="dot"></div>
+            <span id="conn-text">Connecting...</span>
+        </div>
+    </div>
+
+    <div id="node-panel">
+        <div class="panel-header">
+            <span>Active Reactors</span>
+            <span id="node-count">0</span>
+        </div>
+        <div id="node-list">
+            <!-- Cards injected via JS -->
+            <div style="text-align:center; padding: 20px; color: #666; font-size: 12px;">Awaiting MQTT Signals...</div>
+        </div>
+    </div>
+
+    <div class="oracle-footer">
+        <div>🤖 สร้างโดย <strong>Antigravity Oracle</strong> — The Unseen Force</div>
+        <div>
+            <a href="travel-3d.html">🚄 3D Train</a> •
+            <a href="travel-map.html">🗺️ 2D Map</a> •
+            <a href="index.html">👤 CV</a>
+        </div>
+    </div>
+
+    <!-- Importmap for Three.js -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ==============================================
+        // 1. DATA STATE MANAGEMENT
+        // ==============================================
+        const nodes = {}; // Dictionary of N-xxx -> Data Object
+        let nodesArray = [];
+        let selectedNodeId = null;
+
+        // AQI Logic Helper
+        function getAQIColor(pm25) {
+            if (pm25 <= 25) return { hex: 0x00ff66, css: 'pm-good', name: 'Good', intensity: 1.0 };
+            if (pm25 <= 50) return { hex: 0xffcc00, css: 'pm-mod', name: 'Moderate', intensity: 1.5 };
+            if (pm25 <= 100) return { hex: 0xff5500, css: 'pm-unh', name: 'Unhealthy', intensity: 2.0 };
+            return { hex: 0xff0055, css: 'pm-haz', name: 'Hazardous', intensity: 3.0 };
+        }
+
+        // ==============================================
+        // 2. THREE.JS SCENE SETUP
+        // ==============================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05050a, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 30, 80);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 200;
+
+        // Environment: Dark Tech Floor
+        const gridGeo = new THREE.PlaneGeometry(300, 300, 40, 40);
+        gridGeo.rotateX(-Math.PI / 2);
+        const gridMat = new THREE.MeshStandardMaterial({
+            color: 0x0a0c10,
+            roughness: 0.1,
+            metalness: 0.8,
+            wireframe: false
+        });
+        const floor = new THREE.Mesh(gridGeo, gridMat);
+        floor.position.y = -10;
+        scene.add(floor);
+
+        // Grid Lines Overlay
+        const gridLines = new THREE.GridHelper(300, 100, 0x00ffff, 0x111122);
+        gridLines.position.y = -9.9;
+        gridLines.material.opacity = 0.15;
+        gridLines.material.transparent = true;
+        scene.add(gridLines);
+
+        // Global Lighting
+        scene.add(new THREE.AmbientLight(0x111122));
+
+        // Core Reactor Storage (3D Meshes)
+        const reactors = {}; // N-xxx -> THREE.Group
+
+        // Reusable Geometries
+        const coreGeo = new THREE.IcosahedronGeometry(2, 2);
+        const ringGeo = new THREE.TorusGeometry(3.5, 0.05, 16, 64);
+        const sparkGeo = new THREE.BufferGeometry();
+        // A simple particle system geometry setup will be created per reactor
+
+        function createReactor(id, initialData) {
+            const group = new THREE.Group();
+
+            // Layout logic: spiral or grid. Let's do a spiral starting from center
+            const count = Object.keys(reactors).length;
+            const angle = count * 2.4;
+            const radius = 10 + count * 2;
+            group.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+
+            // The Inner Core
+            const colorData = getAQIColor(initialData.pm25);
+            const coreMat = new THREE.MeshStandardMaterial({
+                color: colorData.hex,
+                emissive: colorData.hex,
+                emissiveIntensity: colorData.intensity * 0.5,
+                roughness: 0.2,
+                metalness: 0.8,
+                wireframe: true
+            });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            group.add(core);
+
+            // Inner Core Solid Pulse
+            const solidMat = new THREE.MeshStandardMaterial({
+                color: 0x000000,
+                emissive: colorData.hex,
+                emissiveIntensity: colorData.intensity * 0.2,
+                roughness: 0.1
+            });
+            const solidCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 1), solidMat);
+            group.add(solidCore);
+
+            // Energy Rings
+            const ringMat = new THREE.MeshStandardMaterial({
+                color: colorData.hex,
+                emissive: colorData.hex,
+                emissiveIntensity: colorData.intensity,
+            });
+            const ring1 = new THREE.Mesh(ringGeo, ringMat);
+            const ring2 = new THREE.Mesh(ringGeo, ringMat);
+            ring1.rotation.x = Math.PI / 2;
+            ring2.rotation.y = Math.PI / 2;
+            group.add(ring1);
+            group.add(ring2);
+
+            // Point Light
+            const light = new THREE.PointLight(colorData.hex, colorData.intensity * 2, 25);
+            group.add(light);
+
+            // Label (HTML overlay synced to 3D position is better, but simple sprite text works)
+            // For performance and aesthetics, we rely on the HUD, but when clicked, camera moves here.
+
+            group.userData = {
+                id: id,
+                core: core,
+                solid: solidCore,
+                ring1: ring1,
+                ring2: ring2,
+                light: light,
+                targetColor: new THREE.Color(colorData.hex),
+                targetIntensity: colorData.intensity,
+                pm25: initialData.pm25
+            };
+
+            scene.add(group);
+            reactors[id] = group;
+            return group;
+        }
+
+        function updateReactorColor(id, pm25) {
+            if (!reactors[id]) return;
+            const r = reactors[id];
+            const colorData = getAQIColor(pm25);
+
+            // Set targets for smooth lerping in animation loop
+            r.userData.targetColor.setHex(colorData.hex);
+            r.userData.targetIntensity = colorData.intensity;
+            r.userData.pm25 = pm25;
+            r.userData.sysCss = colorData.css;
+        }
+
+        // ==============================================
+        // 3. UI UPDATES
+        // ==============================================
+        function updateUI() {
+            // Sort nodes by PM2.5 descending
+            nodesArray = Object.values(nodes).sort((a, b) => b.pm25 - a.pm25);
+
+            document.getElementById('node-count').textContent = nodesArray.length;
+
+            const listEl = document.getElementById('node-list');
+            listEl.innerHTML = '';
+
+            nodesArray.forEach(n => {
+                const colorData = getAQIColor(n.pm25);
+                const timeStr = new Date(n.ts).toLocaleTimeString();
+
+                const card = document.createElement('div');
+                card.className = `node-card ${selectedNodeId === n.id ? 'active' : ''}`;
+                card.onclick = () => selectNode(n.id);
+
+                card.innerHTML = `
+                    <div class="time-ago">${timeStr}</div>
+                    <div class="node-name">${n.name}</div>
+                    <div class="node-stats">
+                        <div class="stat-box">
+                            <div class="stat-val ${colorData.css}">${n.pm25}</div>
+                            <div class="stat-lbl">PM2.5</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val">${n.pm10}</div>
+                            <div class="stat-lbl">PM10</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val" style="color:#aaa">${Math.round(n.temp)}°C</div>
+                            <div class="stat-lbl">Temp</div>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function selectNode(id) {
+            selectedNodeId = id;
+            updateUI(); // Highlights card
+
+            // Move camera to reactor
+            if (reactors[id]) {
+                const rp = reactors[id].position;
+                // Tween camera position
+                const targetPos = new THREE.Vector3(rp.x, rp.y + 10, rp.z + 20);
+
+                // Very simple hacky lerp implementation for demonstration
+                // In production, use GSAP or a tweening library
+                let step = 0;
+                const distPos = targetPos.clone().sub(camera.position);
+                const distTarget = rp.clone().sub(controls.target);
+
+                const anim = setInterval(() => {
+                    step += 0.05;
+                    camera.position.addScaledVector(distPos, 0.05);
+                    controls.target.addScaledVector(distTarget, 0.05);
+                    if (step >= 1) clearInterval(anim);
+                }, 16);
+            }
+        }
+
+        // ==============================================
+        // 4. MQTT LOGIC
+        // ==============================================
+        const brokerUrl = 'wss://dustboy-wss-bridge.laris.workers.dev/mqtt';
+        const client = mqtt.connect(brokerUrl);
+
+        const statusEl = document.getElementById('conn-status');
+        const textEl = document.getElementById('conn-text');
+
+        client.on('connect', () => {
+            statusEl.classList.remove('offline');
+            textEl.textContent = 'Live Database Connected';
+            client.subscribe('DUSTBOY/+/+/+/status');
+            console.log("Connected to DustBoy MQTT bridge.");
+        });
+
+        client.on('error', (err) => {
+            statusEl.classList.add('offline');
+            textEl.textContent = 'Connection Error';
+            console.error('MQTT Error:', err);
+        });
+
+        client.on('message', (topic, message) => {
+            try {
+                const payload = JSON.parse(message.toString());
+                const info = payload.info || {};
+                const data = payload.d || {};
+
+                // Extract identifying info
+                const id = info.id || topic.split('/')[3];
+                const name = payload.nickname || id;
+                const pm25 = data.pm2_5;
+                const pm10 = data.pm10;
+
+                if (pm25 === undefined) return; // Skip invalid payloads
+
+                const nodeData = {
+                    id: id,
+                    name: name,
+                    pm25: pm25,
+                    pm10: pm10,
+                    temp: data.temp_c || 0,
+                    hum: data.humid_rh || 0,
+                    ts: Date.now()
+                };
+
+                // Create or Update
+                if (!nodes[id]) {
+                    nodes[id] = nodeData;
+                    createReactor(id, nodeData);
+                } else {
+                    nodes[id] = nodeData;
+                    updateReactorColor(id, pm25);
+                }
+
+                // Throttle UI updates to avoid freezing when huge bursts of messages arrive
+                if (!window.uiUpdateTimeout) {
+                    window.uiUpdateTimeout = setTimeout(() => {
+                        updateUI();
+                        window.uiUpdateTimeout = null;
+                    }, 500);
+                }
+
+            } catch (e) {
+                console.error("Payload parse error:", e);
+            }
+        });
+
+        // ==============================================
+        // 5. ANIMATION LOOP
+        // ==============================================
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+
+            // Animate Reactors
+            Object.values(reactors).forEach(r => {
+                const u = r.userData;
+                // Smooth color transition
+                r.children[0].material.color.lerp(u.targetColor, 0.05);
+                r.children[0].material.emissive.copy(r.children[0].material.color);
+
+                const curIntensity = r.children[4].intensity; // Light
+                r.children[4].intensity += (u.targetIntensity * 2 - curIntensity) * 0.1;
+
+                // Calculate rotation speed based on PM2.5 intensity (faster = more polluted)
+                const baseSpeed = 0.5;
+                const speed = baseSpeed * u.targetIntensity;
+
+                // Core rotation
+                u.core.rotation.x += dt * speed;
+                u.core.rotation.y += dt * speed * 1.2;
+
+                // Solid core pulsing
+                const s = 1 + Math.sin(elapsed * Math.PI * speed) * 0.1;
+                u.solid.scale.set(s, s, s);
+
+                // Rings rotation
+                u.ring1.rotation.y += dt * speed * -1.5;
+                u.ring2.rotation.x += dt * speed * 2;
+
+                // Float up and down
+                r.position.y = Math.sin(elapsed * 2 + r.position.x) * 1.5;
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Responsive resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+
+</html>

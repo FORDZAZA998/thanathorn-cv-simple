@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Map: Chiang Mai to Phitsanulok</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 15px 20px;
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #4da6ff;
+        }
+
+        p.subtitle {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            color: #aaaaaa;
+        }
+
+        #map {
+            flex-grow: 1;
+            width: 100%;
+            z-index: 1;
+        }
+
+        footer {
+            padding: 10px 20px;
+            background-color: #1e1e1e;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #888888;
+        }
+
+        #playTrainBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s;
+        }
+
+        #playTrainBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* Custom Popup Styling for Dark Theme */
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .leaflet-popup-content {
+            margin: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #4da6ff;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .popup-detail {
+            margin: 4px 0;
+            font-size: 0.9em;
+        }
+
+        .battery-icon {
+            display: inline-block;
+            width: 20px;
+            height: 10px;
+            border: 1px solid #888;
+            border-radius: 2px;
+            position: relative;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 2px;
+            height: 4px;
+            background-color: #888;
+        }
+
+        .battery-level {
+            height: 100%;
+            background-color: #4caf50;
+        }
+
+        .battery-level.low {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Chiang Mai → Phitsanulok 🚂</h1>
+        <p class="subtitle">Interactive Travel Map / PSRU Workshop 2026</p>
+        <button id="playTrainBtn">🚂 Start Train</button>
+    </header>
+
+    <div id="map"></div>
+
+    <footer>
+        <div>🤖 สร้างโดย <strong>Antigravity Oracle</strong> — The Unseen Force</div>
+        <div style="margin-top: 5px; font-size: 0.85rem;">
+            <a href="travel-3d.html" style="color: #4da6ff; text-decoration: none;">🚄 3D Train</a> •
+            <a href="dustboy-3d.html" style="color: #4da6ff; text-decoration: none;">⚡ 3D ฝุ่น</a> •
+            <a href="index.html" style="color: #4da6ff; text-decoration: none;">👤 CV</a>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <script>
+        // Initialize Map
+        const map = L.map('map').setView([17.7000, 99.5000], 8); // Roughly center of Northern Thailand
+
+        // Add Dark Theme TileLayer (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Fetch and parse the CSV data
+        Papa.parse('travel-phitsanulok.csv', {
+            download: true,
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: function (results) {
+                const data = results.data;
+                console.log(`Loaded ${data.length} waypoints.`);
+
+                const latLngs = [];
+
+                // Track min/max for auto-fitting bounds
+                let minLat = Infinity, maxLat = -Infinity;
+                let minLon = Infinity, maxLon = -Infinity;
+
+                data.forEach((row, index) => {
+                    const lat = row.lat;
+                    const lon = row.lon;
+
+                    // Basic validation
+                    if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
+
+                    latLngs.push([lat, lon]);
+
+                    // Update bounds
+                    if (lat < minLat) minLat = lat;
+                    if (lat > maxLat) maxLat = lat;
+                    if (lon < minLon) minLon = lon;
+                    if (lon > maxLon) maxLon = lon;
+
+                    // Calculate battery bar width and color
+                    let batteryHtml = '';
+                    if (row.battery !== undefined && row.battery !== null) {
+                        const batteryPercent = Math.min(100, Math.max(0, parseFloat(row.battery) * 100)); // Assuming battery is 0-1 or percentage. If it's already 0-100, adjust.
+                        // Wait, looking at sample 'battery' usually implies 0-100 or 0.0-1.0. Let's assume it's 0-100 if > 1.
+                        const level = row.battery > 1 ? row.battery : row.battery * 100;
+                        const isLow = level < 20;
+                        batteryHtml = `
+                            <div class="popup-detail">
+                                <span class="battery-icon">
+                                    <div class="battery-level ${isLow ? 'low' : ''}" style="width: ${level}%"></div>
+                                </span>
+                                ${Math.round(level)}% ${row.charging === 'true' || row.charging === true ? '⚡' : ''}
+                            </div>
+                        `;
+                    }
+
+                    // Format Time
+                    let timeString = 'Unknown Time';
+                    if (row.updated) {
+                        const date = new Date(row.updated);
+                        timeString = date.toLocaleString('th-TH');
+                    }
+
+                    // Determine place name or fallback to locality
+                    let locationName = row.place || row.locality || 'Unknown Location';
+
+                    // Build Popup Content
+                    const popupContent = `
+                        <div class="popup-title">${locationName}</div>
+                        <div class="popup-detail">🕒 ${timeString}</div>
+                        ${batteryHtml}
+                        <div class="popup-detail" style="font-size: 0.8em; color: #888;">Point #${index + 1} | Accuracy: ${row.accuracy || '?'}m</div>
+                    `;
+
+                    // We only place a marker for every 10th point, or the first/last, to avoid clutter
+                    if (index === 0 || index === data.length - 1 || index % 15 === 0) {
+
+                        // Custom icon based on start/end/middle
+                        let markerColor = '#4da6ff';
+                        let radius = 6;
+                        let weight = 2;
+
+                        if (index === 0) { markerColor = '#4caf50'; radius = 8; weight = 3; locationName = 'START: ' + locationName; } // Green for Start
+                        else if (index === data.length - 1) { markerColor = '#f44336'; radius = 8; weight = 3; locationName = 'END: ' + locationName; } // Red for End
+
+                        L.circleMarker([lat, lon], {
+                            radius: radius,
+                            fillColor: markerColor,
+                            color: '#ffffff',
+                            weight: weight,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        })
+                            .addTo(map)
+                            .bindPopup(popupContent);
+                    }
+                });
+
+                // Draw the connecting line (Polyline)
+                if (latLngs.length > 1) {
+                    L.polyline(latLngs, {
+                        color: '#4da6ff',
+                        weight: 4,
+                        opacity: 0.7,
+                        dashArray: '5, 10',
+                        lineJoin: 'round'
+                    }).addTo(map);
+
+                    // Fit map bounds to the route
+                    map.fitBounds([
+                        [minLat, minLon],
+                        [maxLat, maxLon]
+                    ], { padding: [50, 50] });
+
+                    // --- Train Animation Logic ---
+
+                    // Top-down train SVG model
+                    const trainSvg = `
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));">
+                        <g id="train-group" style="transform-origin: center; transition: transform 0.1s linear;">
+                            <!-- Body -->
+                            <rect x="35" y="10" width="30" height="80" rx="4" fill="#f44336" stroke="#222" stroke-width="2"/>
+                            <!-- Roof/Engine -->
+                            <rect x="38" y="15" width="24" height="20" fill="#333" />
+                            <rect x="40" y="40" width="20" height="40" fill="#555" />
+                            <!-- Headlight -->
+                            <circle cx="50" cy="8" r="4" fill="#ffeb3b" />
+                        </g>
+                    </svg>`;
+
+                    const trainIcon = L.divIcon({
+                        html: `<div id="train-container" style="margin-left: -20px; margin-top: -20px;">${trainSvg}</div>`,
+                        className: 'dummy-train-icon',
+                        iconSize: [40, 40]
+                    });
+
+                    // Add Train Marker to Map at the start point
+                    const trainMarker = L.marker(latLngs[0], { icon: trainIcon, zIndexOffset: 1000 }).addTo(map);
+
+                    let isAnimating = false;
+                    let currentIndex = 0;
+                    let animationTimeout = null;
+                    const btn = document.getElementById('playTrainBtn');
+
+                    // Calculate bearing (angle) between two coords to rotate the train
+                    function getBearing(lat1, lon1, lat2, lon2) {
+                        const toRad = deg => deg * Math.PI / 180;
+                        const toDeg = rad => rad * 180 / Math.PI;
+                        const dLon = toRad(lon2 - lon1);
+                        const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+                        const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+                        const brng = toDeg(Math.atan2(y, x));
+                        return (brng + 360) % 360;
+                    }
+
+                    function moveTrain() {
+                        if (!isAnimating) return;
+
+                        const currentPos = latLngs[currentIndex];
+                        currentIndex++;
+
+                        if (currentIndex >= latLngs.length) {
+                            // Finished
+                            isAnimating = false;
+                            btn.innerText = "🚂 Restart Train";
+                            btn.style.backgroundColor = "#4CAF50";
+                            return;
+                        }
+
+                        const nextPos = latLngs[currentIndex];
+
+                        // Calculate angle and apply rotation
+                        const angle = getBearing(currentPos[0], currentPos[1], nextPos[0], nextPos[1]);
+                        const trainGroup = document.getElementById('train-group');
+                        if (trainGroup) {
+                            trainGroup.style.transform = `rotate(${angle}deg)`;
+                        }
+
+                        // Move the marker
+                        trainMarker.setLatLng(nextPos);
+
+                        // Smoothly pan map to keep train in view
+                        map.panTo(nextPos, { animate: true, duration: 0.2 });
+
+                        // Animate to next frame
+                        animationTimeout = setTimeout(moveTrain, 100);
+                    }
+
+                    btn.addEventListener('click', () => {
+                        if (isAnimating) {
+                            // Stop Animation
+                            isAnimating = false;
+                            clearTimeout(animationTimeout);
+                            btn.innerText = "🚂 Resume Train";
+                            btn.style.backgroundColor = "#4CAF50";
+                        } else {
+                            // Start or Resume Animation
+                            if (currentIndex >= latLngs.length - 1) {
+                                currentIndex = 0; // Reset to start if finished
+                                trainMarker.setLatLng(latLngs[0]);
+                            }
+                            isAnimating = true;
+                            btn.innerText = "🛑 Stop Train";
+                            btn.style.backgroundColor = "#f44336";
+                            moveTrain();
+                        }
+                    });
+
+                    // --- End Train Animation Logic ---
+                }
+            },
+            error: function (err) {
+                console.error("Error parsing CSV:", err);
+                document.getElementById('map').innerHTML = '<h3 style="text-align:center; padding: 20px;">Error loading route data. Make sure travel-phitsanulok.csv exists in the same folder.</h3>';
+            }
+        });
+    </script>
+
+</body>
+
+</html>
