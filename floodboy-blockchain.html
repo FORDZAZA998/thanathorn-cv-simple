@@ -189,20 +189,36 @@
         </div>
 
         <!-- Store Selector (Admin / Demo tools) -->
-        <div class="flex justify-center gap-3 mb-6">
-            <button onclick="switchStore('0xCd3Ec17ddFDa24f8F97131fa0FDf20e7cbd1A8Bb')"
-                class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50">FloodBoy001</button>
-            <button onclick="switchStore('0x0994Bc66b2863f8D58C8185b1ed6147895632812')"
-                class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50">FloodBoy016</button>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+            <div class="flex gap-2">
+                <button onclick="switchStore('0xCd3Ec17ddFDa24f8F97131fa0FDf20e7cbd1A8Bb')"
+                    class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50">FloodBoy001</button>
+                <button onclick="switchStore('0x0994Bc66b2863f8D58C8185b1ed6147895632812')"
+                    class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50 border-blue-500/30 text-white">FloodBoy016</button>
+            </div>
+
+            <div class="h-6 w-px bg-white/10 hidden md:block"></div>
+
+            <!-- View Controls -->
+            <div class="flex bg-darkBg p-1 rounded border border-white/5">
+                <button id="view-chart-btn" onclick="toggleView('chart')"
+                    class="px-3 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all">
+                    <i class="fas fa-chart-line mr-1"></i> Chart
+                </button>
+                <button id="view-table-btn" onclick="toggleView('table')"
+                    class="px-3 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">
+                    <i class="fas fa-table-list mr-1"></i> Table
+                </button>
+            </div>
         </div>
 
         <!-- Main Chart Section (Full Width Top) -->
-        <section class="glass-panel p-6 relative">
+        <section id="chart-section" class="glass-panel p-6 relative">
             <div id="loading-chart" class="loading-overlay hidden">
                 <div class="spinner"></div>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <div class="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded bg-darkBg flex items-center justify-center border border-white/5">
                         <i class="fas fa-chart-line text-neonBlue text-sm"></i>
@@ -210,17 +226,38 @@
                     <h3 id="chart-title" class="text-lg font-bold text-white tracking-wide">Water Depth Over Time</h3>
                 </div>
 
-                <div class="flex bg-darkBg p-1 rounded border border-white/5 mt-4 md:mt-0">
-                    <button id="toggle-water" onclick="toggleChart('waterDepth')"
-                        class="px-4 py-1.5 bg-white/10 text-white rounded text-xs font-semibold transition-all">Water
-                        Depth</button>
-                    <button id="toggle-battery" onclick="toggleChart('batteryVoltage')"
-                        class="px-4 py-1.5 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">Battery
-                        Voltage</button>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <!-- Metric Toggle -->
+                    <div class="flex bg-darkBg p-1 rounded border border-white/5">
+                        <button id="toggle-water" onclick="toggleChart('waterDepth')"
+                            class="px-3 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all">Water
+                            Depth</button>
+                        <button id="toggle-battery" onclick="toggleChart('batteryVoltage')"
+                            class="px-3 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">Battery
+                            Voltage</button>
+                    </div>
+
+                    <!-- Grouping Toggle -->
+                    <div class="flex bg-darkBg p-1 rounded border border-white/5">
+                        <button onclick="setGrouping(30, this)"
+                            class="group-btn px-2 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all">30m</button>
+                        <button onclick="setGrouping(60, this)"
+                            class="group-btn px-2 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">1h</button>
+                        <button onclick="setGrouping(360, this)"
+                            class="group-btn px-2 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">6h</button>
+                        <button onclick="setGrouping(1440, this)"
+                            class="group-btn px-2 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">24h</button>
+                    </div>
+
+                    <!-- Fullscreen -->
+                    <button onclick="toggleFullscreen()"
+                        class="w-8 h-8 flex items-center justify-center bg-darkBg text-gray-400 hover:text-white rounded border border-white/5 transition-all">
+                        <i class="fas fa-expand text-xs"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="w-full h-[350px]">
+            <div id="chart-container" class="w-full h-[350px] transition-all duration-300">
                 <canvas id="sensorChart"></canvas>
                 <div id="no-data-msg"
                     class="hidden h-full flex items-center justify-center text-gray-600 italic font-mono text-sm">No
@@ -228,11 +265,10 @@
             </div>
         </section>
 
-        <!-- Bottom Grid Layout: 2 Columns -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+        <div id="bottom-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
 
             <!-- Left: Data Table -->
-            <section class="glass-panel p-6 relative overflow-hidden">
+            <section id="table-section" class="glass-panel p-6 relative overflow-hidden">
                 <div id="loading-table" class="loading-overlay hidden">
                     <div class="spinner"></div>
                 </div>
@@ -372,8 +408,10 @@
         let currentStore = '0x0994Bc66b2863f8D58C8185b1ed6147895632812'; // Default: FloodBoy016
         let chartInstance = null;
         let globalHistoricalData = [];
+        let groupedHistoricalData = [];
         let currentFields = [];
         let activeChartType = 'waterDepth';
+        let groupingInterval = 30; // 30 minutes default
 
         Chart.defaults.color = '#6b7280';
         Chart.defaults.font.family = "'JetBrains Mono', monospace";
@@ -403,14 +441,54 @@
             return value + ' ' + baseUnit;
         }
 
+        // Data Grouping Algorithm
+        function groupData(data, intervalMinutes) {
+            if (!data || data.length === 0) return [];
+            const intervalMs = intervalMinutes * 60 * 1000;
+            const grouped = [];
+            let currentGroup = [];
+            let currentIntervalStart = Math.floor(data[0].timestamp / intervalMs) * intervalMs;
+
+            data.forEach(item => {
+                if (item.timestamp >= currentIntervalStart + intervalMs) {
+                    if (currentGroup.length > 0) {
+                        grouped.push(averageGroup(currentGroup, currentIntervalStart));
+                        currentGroup = [];
+                    }
+                    currentIntervalStart = Math.floor(item.timestamp / intervalMs) * intervalMs;
+                }
+                currentGroup.push(item);
+            });
+            if (currentGroup.length > 0) {
+                grouped.push(averageGroup(currentGroup, currentIntervalStart));
+            }
+            return grouped;
+        }
+
+        function averageGroup(group, timestamp) {
+            const avg = { timestamp: timestamp, waterDepth: null, batteryVoltage: null, rawValues: group[group.length - 1].rawValues };
+            let wdSum = 0, wdCount = 0, bvSum = 0, bvCount = 0;
+
+            group.forEach(item => {
+                if (item.waterDepth !== null) { wdSum += item.waterDepth; wdCount++; }
+                if (item.batteryVoltage !== null) { bvSum += item.batteryVoltage; bvCount++; }
+            });
+
+            if (wdCount > 0) avg.waterDepth = wdSum / wdCount;
+            if (bvCount > 0) avg.batteryVoltage = bvSum / bvCount;
+            return avg;
+        }
+
         // Chart.js implementation for dark mode
         function renderChart() {
             const ctx = document.getElementById('sensorChart').getContext('2d');
             const noDataMsg = document.getElementById('no-data-msg');
 
+            groupedHistoricalData = groupData(globalHistoricalData, groupingInterval);
+
             if (chartInstance) chartInstance.destroy();
 
-            if (globalHistoricalData.length === 0) {
+            if (groupedHistoricalData.length === 0) {
                 document.getElementById('sensorChart').style.display = 'none';
                 noDataMsg.classList.remove('hidden');
                 return;
@@ -427,7 +505,7 @@
             bgGradient.addColorStop(0, `rgba(${rgbColor}, 0.3)`);
             bgGradient.addColorStop(1, 'rgba(5, 6, 8, 0)');
 
-            const dataPoints = globalHistoricalData.map(d => ({
+            const dataPoints = groupedHistoricalData.map(d => ({
                 x: new Date(d.timestamp),
                 y: isWater ? d.waterDepth : d.batteryVoltage
             })).filter(d => d.y !== null);
@@ -647,8 +725,46 @@
 
         window.switchStore = (address) => {
             currentStore = address;
-            // Visual button state update could go here
             loadData();
+        };
+
+        window.setGrouping = function (minutes, btnElement) {
+            groupingInterval = minutes;
+            document.querySelectorAll('.group-btn').forEach(btn => {
+                btn.className = "group-btn px-2 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all";
+            });
+            btnElement.className = "group-btn px-2 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all";
+            renderChart();
+        };
+
+        window.toggleView = function (view) {
+            const chartSec = document.getElementById('chart-section');
+            const bottomGrid = document.getElementById('bottom-grid');
+            const cBtn = document.getElementById('view-chart-btn');
+            const tBtn = document.getElementById('view-table-btn');
+
+            if (view === 'chart') {
+                chartSec.style.display = 'block';
+                bottomGrid.style.display = 'none';
+                cBtn.className = "px-3 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all";
+                tBtn.className = "px-3 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all";
+            } else {
+                chartSec.style.display = 'none';
+                bottomGrid.style.display = 'grid';
+                tBtn.className = "px-3 py-1 bg-white/10 text-white rounded text-xs font-semibold transition-all";
+                cBtn.className = "px-3 py-1 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all";
+            }
+        };
+
+        window.toggleFullscreen = function () {
+            const chartSec = document.getElementById('chart-section');
+            if (!document.fullscreenElement) {
+                chartSec.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         };
 
         // Load setup
