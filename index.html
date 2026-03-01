@@ -4,684 +4,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE ORACLE ✦ Interactive Portfolio Hub</title>
-    <!-- Premium Fonts: Montserrat for headers, Inter for UI, Sarabun for Thai fallback -->
+    <title>Antigravity Oracle | เทพปีศาจแห่งความฝัน 🔮</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700&family=Inter:wght@300;400;500&family=Sarabun:wght@300;400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap"
         rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-color: #050214;
+            --accent-purple: #7000FF;
+            --accent-cyan: #00F2FF;
+            --text-glow: 0 0 10px rgba(112, 0, 255, 0.8), 0 0 20px rgba(112, 0, 255, 0.4);
+            --neon-cyan: 0 0 15px rgba(0, 242, 255, 0.6);
         }
 
         body {
-            background-color: #050508;
-            color: #ffffff;
-            font-family: 'Inter', 'Sarabun', sans-serif;
-            overflow: hidden;
-            /* Hide scrollbars for full-screen canvas */
-            cursor: crosshair;
-            /* Techy cursor */
-        }
-
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            /* Background gradient overlay to make text pop */
-            background: radial-gradient(circle at center, transparent 0%, #020205 100%);
-        }
-
-        /* UI Overlay */
-        #hud-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            /* Let mouse interact with 3D canvas */
-        }
-
-        /* Elegant Header */
-        .header-wrap {
-            text-align: center;
-            margin-bottom: 50px;
-            pointer-events: auto;
-            /* Re-enable clicks */
-            animation: fadeInDown 1.5s ease-out;
-        }
-
-        h1 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 42px;
-            font-weight: 200;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: #ffffff;
-            margin-bottom: 12px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-        }
-
-        h1 strong {
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 300;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        /* Premium Glassmorphism Grid */
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            max-width: 960px;
-            width: 90%;
-            pointer-events: auto;
-            /* Re-enable for links */
-            perspective: 1000px;
-        }
-
-        .portal-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 2px;
-            /* Sharp, modern corners */
-            padding: 40px 30px;
-            text-decoration: none;
+            background-color: var(--bg-color);
             color: #fff;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: fadeInUp 1s ease-out backwards;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            background: radial-gradient(circle at center, #1a0b3c 0%, #050214 100%);
         }
 
-        /* Staggered load animation */
-        .portal-card:nth-child(1) {
-            animation-delay: 0.2s;
+        .space-font {
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        .portal-card:nth-child(2) {
-            animation-delay: 0.4s;
-        }
-
-        .portal-card:nth-child(3) {
-            animation-delay: 0.6s;
-        }
-
-        .portal-card:nth-child(4) {
-            animation-delay: 0.8s;
-        }
-
-        /* Elegance Hover Effect */
-        .portal-card::before {
-            content: '';
-            position: absolute;
+        /* Animated Nebula Background */
+        .nebula {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 100%;
             height: 100%;
-            background: #ffffff;
-            transform: scaleY(0);
-            transform-origin: bottom;
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: -1;
+            filter: blur(80px);
             opacity: 0.5;
         }
 
-        .portal-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-8px) translateZ(20px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 255, 255, 0.05);
-        }
-
-        .portal-card:hover::before {
-            transform: scaleY(1);
-        }
-
-        /* Card Themes */
-        .card-dustboy:hover::before {
-            background: #00ff88;
-            box-shadow: 0 0 15px #00ff88;
-        }
-
-        .card-dustboy:hover .card-icon {
-            color: #00ff88;
-            text-shadow: 0 0 15px #00ff88;
-        }
-
-        .card-train:hover::before {
-            background: #ffaa00;
-            box-shadow: 0 0 15px #ffaa00;
-        }
-
-        .card-train:hover .card-icon {
-            color: #ffaa00;
-            text-shadow: 0 0 15px #ffaa00;
-        }
-
-        .card-map:hover::before {
-            background: #0088ff;
-            box-shadow: 0 0 15px #0088ff;
-        }
-
-        .card-map:hover .card-icon {
-            color: #0088ff;
-            text-shadow: 0 0 15px #0088ff;
-        }
-
-        .card-cv:hover::before {
-            background: #ff3366;
-            box-shadow: 0 0 15px #ff3366;
-        }
-
-        .card-cv:hover .card-icon {
-            color: #ff3366;
-            text-shadow: 0 0 15px #ff3366;
-        }
-
-        .card-icon {
-            font-size: 32px;
-            margin-bottom: 24px;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.4s ease;
-        }
-
-        .card-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-            color: #ffffff;
-        }
-
-        .card-desc {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.6;
-            font-weight: 300;
-        }
-
-        /* Geometric Accents on Cards */
-        .card-accent {
+        .nebula-node {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 10px;
-            font-family: monospace;
-            color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            background: var(--accent-purple);
+            animation: drift 20s infinite alternate ease-in-out;
         }
 
-        .oracle-footer {
-            position: absolute;
-            bottom: 30px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 11px;
-            font-family: monospace;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 10;
-            pointer-events: none;
-            letter-spacing: 2px;
-            animation: fadeIn 2s ease-in 1s backwards;
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
+        @keyframes drift {
             from {
-                opacity: 0;
-                transform: translateY(-30px);
+                transform: translate(0, 0) scale(1);
             }
 
             to {
-                opacity: 1;
-                transform: translateY(0);
+                transform: translate(10vw, 15vh) scale(1.5);
             }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
+        /* Glassmorphism Card */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* Glitch Text Effect */
+        .glitch-text {
+            text-shadow: 2px 0 var(--accent-purple), -2px 0 var(--accent-cyan);
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 0 var(--accent-purple), -2px 0 var(--accent-cyan);
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            5% {
+                text-shadow: -2px 0 var(--accent-purple), 2px 0 var(--accent-cyan);
+            }
+
+            10% {
+                text-shadow: 2px 0 var(--accent-purple), -2px 0 var(--accent-cyan);
+            }
+
+            100% {
+                text-shadow: 1px 0 var(--accent-purple), -1px 0 var(--accent-cyan);
             }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+        /* Neon Buttons */
+        .btn-neon {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--accent-purple);
+            transition: all 0.3s ease;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .portal-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
+        .btn-neon:hover {
+            background: var(--accent-purple);
+            box-shadow: var(--text-glow);
+            border-color: #fff;
+        }
+
+        /* Floating Orb */
+        .dream-orb {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: pulse 4s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.4;
             }
 
-            .header-wrap {
-                margin-bottom: 30px;
-            }
-
-            h1 {
-                font-size: 24px;
-                letter-spacing: 4px;
-            }
-
-            .portal-card {
-                padding: 24px;
-            }
-
-            .card-icon {
-                font-size: 24px;
-                margin-bottom: 16px;
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
             }
         }
     </style>
 </head>
 
-<body>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- 3D Background Container -->
-    <div id="canvas-container"></div>
-
-    <!-- UI Overlay -->
-    <div id="hud-container">
-        <div class="header-wrap">
-            <h1>THE <strong>ORACLE</strong></h1>
-            <div class="subtitle">Creative Technology & Analytics Hub — PSRU</div>
-        </div>
-
-        <div class="portal-grid">
-            <!-- DustBoy -->
-            <a href="dustboy-3d.html" class="portal-card card-dustboy">
-                <span class="card-accent">[SYS.01]</span>
-                <span class="card-icon">⚡</span>
-                <div class="card-title">DustBoy Reactor</div>
-                <div class="card-desc">Real-time PM2.5 visualization dashboard powered by live MQTT data streams and
-                    procedural KlakMath organic algorithms.</div>
-            </a>
-
-            <!-- 3D Train -->
-            <a href="travel-3d.html" class="portal-card card-train">
-                <span class="card-accent">[SYS.02]</span>
-                <span class="card-icon">🚄</span>
-                <div class="card-title">Locomotive Engine</div>
-                <div class="card-desc">Interactive Three.js environment featuring a moving train traversing an
-                    expansive, procedurally sculpted morning landscape.</div>
-            </a>
-
-            <!-- 2D Map -->
-            <a href="travel-map.html" class="portal-card card-map">
-                <span class="card-accent">[SYS.03]</span>
-                <span class="card-icon">🗺️</span>
-                <div class="card-title">Geospatial Array</div>
-                <div class="card-desc">Dark-mode CartoDB map system built on Leaflet.js, mapping deep GPS telemetry data
-                    with animated vector tracking.</div>
-            </a>
-
-            <!-- FloodBoy Blockchain Viewer -->
-            <a href="floodboy-blockchain.html" class="portal-card card-dustboy">
-                <span class="card-accent">[SYS.04]</span>
-                <span class="card-icon">🔗</span>
-                <div class="card-title">Blockchain Data Node</div>
-                <div class="card-desc">Decentralized Web3 dashboard reading transparent environmental IoT data directly
-                    from JIBCHAIN L1 Smart Contracts via Viem.js.</div>
-            </a>
-
-            <!-- Portfolio Showcase -->
-            <a href="portfolio.html" class="portal-card card-train">
-                <span class="card-accent">[SYS.05]</span>
-                <span class="card-icon">✨</span>
-                <div class="card-title">Project Showcase File</div>
-                <div class="card-desc">Modern dark-theme portfolio collecting all individual technology experiments and
-                    real-world deployments.</div>
-            </a>
-
-            <!-- Space-bar Race -->
-            <a href="race.html" class="portal-card card-cv">
-                <span class="card-accent">[SYS.06]</span>
-                <span class="card-icon">🏎️</span>
-                <div class="card-title">Real-time Racing Node</div>
-                <div class="card-desc">High-speed multiplayer challenge testing MQTT synchronization and persistent
-                    retained game state.</div>
-            </a>
-
-            <!-- CV -->
-            <a href="cv.html" class="portal-card card-cv">
-                <span class="card-accent">[SYS.00]</span>
-                <span class="card-icon">👤</span>
-                <div class="card-title">Executive Profile</div>
-                <div class="card-desc">Detailed curriculum vitae standardizing executive, political, and academic
-                    histories into a printable data manifest.</div>
-            </a>
-        </div>
+    <!-- Nebula Effects -->
+    <div class="nebula">
+        <div class="nebula-node w-[600px] h-[600px] -top-20 -left-20" style="background: #2D1B69;"></div>
+        <div class="nebula-node w-[500px] h-[500px] bottom-0 right-0"
+            style="background: #14073d; animation-delay: -5s;"></div>
     </div>
 
-    <div class="oracle-footer">
-        POWERED BY ANTIGRAVITY ORACLE // THE UNSEEN FORCE
-    </div>
+    <main class="max-w-4xl w-full text-center relative z-10">
+        <!-- Hero Section -->
+        <div class="mb-12">
+            <div class="flex justify-center mb-6">
+                <div class="dream-orb absolute"></div>
+                <div class="relative text-7xl md:text-8xl font-bold space-font tracking-tighter glitch-text">
+                    ANTIGRAVITY
+                </div>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-light tracking-widest text-cyan-400 opacity-90 mb-4">
+                เทพปีศาจแห่งความฝัน
+            </h2>
+            <p class="text-gray-400 italic font-light max-w-lg mx-auto">
+                "Gravity pulls the pieces together so the Human can admire the constellation."
+            </p>
+        </div>
 
-    <!-- Importmap for Three.js -->
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
-      }
-    }
-    </script>
+        <!-- Portal Nodes Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 px-4 md:px-0">
+            <!-- CV Node -->
+            <a href="cv.html" class="glass p-8 flex flex-col items-center group">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📜</div>
+                <div class="space-font text-xl font-bold mb-1">THE ORACLE CV</div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">Post-Workshop Identity</div>
+            </a>
 
-    <!-- Main Logic -->
-    <script type="module">
-        import * as THREE from 'three';
+            <!-- Race Node -->
+            <a href="race.html" class="glass p-8 flex flex-col items-center group">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🏎️</div>
+                <div class="space-font text-xl font-bold mb-1">ETHER RACE</div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">Real-time MQTT Engine</div>
+            </a>
 
-        // ==============================================
-        // 1. SCENE SETUP
-        // ==============================================
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        // Subtle fog to blend distant particles into the background
-        scene.fog = new THREE.FogExp2(0x050508, 0.0015);
+            <!-- Blockchain Node -->
+            <a href="floodboy-blockchain.html" class="glass p-8 flex flex-col items-center group">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⛓️</div>
+                <div class="space-font text-xl font-bold mb-1">CHAIN OBSERVER</div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">JIBCHAIN L1 Sensors</div>
+            </a>
 
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
-        camera.position.z = 800;
+            <!-- Hub Node -->
+            <a href="hub.html" class="glass p-8 flex flex-col items-center group">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🪐</div>
+                <div class="space-font text-xl font-bold mb-1">DREAM HUB</div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">Project Repository</div>
+            </a>
+        </div>
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
+        <!-- Footer -->
+        <footer class="text-gray-600 text-[10px] uppercase tracking-[0.3em]">
+            &copy; 2026 Antigravity Oracle — Form and Formless — PSRU 69
+        </footer>
+    </main>
 
-        // ==============================================
-        // 2. CONSTELLATION PARTICLES & LINES
-        // ==============================================
-
-        // Settings
-        const particleCount = 600;
-        const maxDistance = 120; // Distance max to draw a line between particles
-        const interactionRadius = 200; // Radius of mouse interaction field
-
-        // Geometries
-        const particlesData = [];
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-
-        const pMaterial = new THREE.PointsMaterial({
-            color: 0x88bbff,
-            size: 4,
-            blending: THREE.AdditiveBlending,
-            transparent: true,
-            sizeAttenuation: true,
-            opacity: 0.8
+    <script>
+        // Subtle mouse parallax effect
+        document.addEventListener('mousemove', (e) => {
+            const orb = document.querySelector('.dream-orb');
+            const x = (window.innerWidth / 2 - e.pageX) / 30;
+            const y = (window.innerHeight / 2 - e.pageY) / 30;
+            orb.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
         });
-
-        // Setup individual particles
-        for (let i = 0; i < particleCount; i++) {
-            // Distribute in a sphere-like cloud, denser at center
-            const x = (Math.random() - 0.5) * 1600;
-            const y = (Math.random() - 0.5) * 1200;
-            const z = (Math.random() - 0.5) * 1200;
-
-            positions[i * 3] = x;
-            positions[i * 3 + 1] = y;
-            positions[i * 3 + 2] = z;
-
-            // Save velocity and home position for organic movement
-            particlesData.push({
-                velocity: new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.5,
-                    (Math.random() - 0.5) * 0.5,
-                    (Math.random() - 0.5) * 0.5
-                ),
-                numConnections: 0,
-                baseX: x,
-                baseY: y,
-                baseZ: z
-            });
-        }
-
-        const particleGeo = new THREE.BufferGeometry();
-        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particleSystem = new THREE.Points(particleGeo, pMaterial);
-        scene.add(particleSystem);
-
-        // Lines Geometry (pre-allocate maximum possible lines for performance)
-        const lineGeo = new THREE.BufferGeometry();
-        // formula for max lines: n * (n-1) / 2 ... but we only link nearby, so we allocate a safe chunk
-        const linesPositions = new Float32Array(particleCount * particleCount * 3);
-        const linesColors = new Float32Array(particleCount * particleCount * 3);
-
-        // We will update these attributes dynamically every frame
-        lineGeo.setAttribute('position', new THREE.BufferAttribute(linesPositions, 3).setUsage(THREE.DynamicDrawUsage));
-        lineGeo.setAttribute('color', new THREE.BufferAttribute(linesColors, 3).setUsage(THREE.DynamicDrawUsage));
-
-        const lineMat = new THREE.LineBasicMaterial({
-            vertexColors: true,
-            blending: THREE.AdditiveBlending,
-            transparent: true,
-            opacity: 0.3
-        });
-
-        const linesMesh = new THREE.LineSegments(lineGeo, lineMat);
-        scene.add(linesMesh);
-
-        // Group to hold the constellation so we can gently rotate it whole
-        const group = new THREE.Group();
-        group.add(particleSystem);
-        group.add(linesMesh);
-        scene.add(group);
-
-        // Add a subtle blue glow light at center
-        const centerLight = new THREE.PointLight(0x0055ff, 3, 1000);
-        scene.add(centerLight);
-
-        // ==============================================
-        // 3. MOUSE INTERACTION SETUP
-        // ==============================================
-        const mouse = new THREE.Vector2(-1000, -1000); // Start off-screen
-        let isMouseMoving = false;
-        let mouseTimeout = null;
-
-        // Create a 3D intersection plane at z=0 to map 2D mouse to 3D space
-        const raycaster = new THREE.Raycaster();
-        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-        const mousePoint3D = new THREE.Vector3();
-
-        document.addEventListener('mousemove', (event) => {
-            // Update 2D normalized mouse coordinates for 3D translation
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            isMouseMoving = true;
-            clearTimeout(mouseTimeout);
-            mouseTimeout = setTimeout(() => { isMouseMoving = false; }, 2000);
-
-            // Parallax effect for the UI Grid
-            const grid = document.querySelector('.portal-grid');
-            const tiltX = (event.clientX / window.innerWidth - 0.5) * 10;
-            const tiltY = (event.clientY / window.innerHeight - 0.5) * 10;
-            grid.style.transform = `rotateY(${tiltX}deg) rotateX(${-tiltY}deg)`;
-        }, false);
-
-        window.addEventListener('mouseout', () => {
-            mouse.x = -1000; mouse.y = -1000;
-        });
-
-        // ==============================================
-        // 4. ANIMATION LOOP
-        // ==============================================
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Gently rotate the whole group
-            group.rotation.y += 0.001;
-            group.rotation.x += 0.0005;
-
-            // Map mouse to 3D point
-            raycaster.setFromCamera(mouse, camera);
-            raycaster.ray.intersectPlane(plane, mousePoint3D);
-
-            let vertexpos = 0;
-            let colorpos = 0;
-            let numConnected = 0;
-
-            const posArray = particleGeo.attributes.position.array;
-
-            // Reset connections count
-            for (let i = 0; i < particleCount; i++) {
-                particlesData[i].numConnections = 0;
-            }
-
-            // Update particle positions
-            for (let i = 0; i < particleCount; i++) {
-                // Get current data
-                const particleData = particlesData[i];
-
-                // Add velocity to position
-                posArray[i * 3] += particleData.velocity.x;
-                posArray[i * 3 + 1] += particleData.velocity.y;
-                posArray[i * 3 + 2] += particleData.velocity.z;
-
-                // Create a current vector representation to do math
-                const pPos = new THREE.Vector3(posArray[i * 3], posArray[i * 3 + 1], posArray[i * 3 + 2]);
-
-                // Bounce off invisible boundaries (bounding box)
-                if (posArray[i * 3] < -800 || posArray[i * 3] > 800) particleData.velocity.x = -particleData.velocity.x;
-                if (posArray[i * 3 + 1] < -600 || posArray[i * 3 + 1] > 600) particleData.velocity.y = -particleData.velocity.y;
-                if (posArray[i * 3 + 2] < -600 || posArray[i * 3 + 2] > 600) particleData.velocity.z = -particleData.velocity.z;
-
-                // --- MOUSE INTERACTION (REPEL & ATTRACT) ---
-                // Calculate distance from this particle to the 3D mouse point (accounting for group rotation)
-                // Convert mousePoint to local group space
-                const localMouse = mousePoint3D.clone();
-                group.worldToLocal(localMouse);
-
-                const distToMouse = pPos.distanceTo(localMouse);
-
-                // If mouse is near, apply a gentle repelling force or draw connections
-                if (distToMouse < interactionRadius && isMouseMoving) {
-                    const repelForce = new THREE.Vector3().subVectors(pPos, localMouse).normalize();
-                    repelForce.multiplyScalar(0.8 * (1 - distToMouse / interactionRadius));
-                    particleData.velocity.add(repelForce);
-
-                    // Clamp velocity so they don't explode infinitely
-                    particleData.velocity.clampLength(0, 2);
-                } else {
-                    // Slowly return velocity to base normal speeds
-                    particleData.velocity.lerp(new THREE.Vector3(
-                        (Math.random() - 0.5) * 0.5,
-                        (Math.random() - 0.5) * 0.5,
-                        (Math.random() - 0.5) * 0.5
-                    ), 0.01);
-                }
-
-                // --- LINE DRAWING (NODE EDGES) ---
-                // Only check particles *after* the current one to avoid drawing double lines
-                for (let j = i + 1; j < particleCount; j++) {
-                    const particleDataB = particlesData[j];
-
-                    const dx = posArray[i * 3] - posArray[j * 3];
-                    const dy = posArray[i * 3 + 1] - posArray[j * 3 + 1];
-                    const dz = posArray[i * 3 + 2] - posArray[j * 3 + 2];
-                    const distSq = dx * dx + dy * dy + dz * dz;
-
-                    // If close enough, draw a line
-                    if (distSq < maxDistance * maxDistance) {
-                        particleData.numConnections++;
-                        particleDataB.numConnections++;
-
-                        // Calculate alpha based on distance (closer = more opaque)
-                        const alpha = 1.0 - Math.sqrt(distSq) / maxDistance;
-
-                        // Start Point
-                        linesPositions[vertexpos++] = posArray[i * 3];
-                        linesPositions[vertexpos++] = posArray[i * 3 + 1];
-                        linesPositions[vertexpos++] = posArray[i * 3 + 2];
-
-                        // End Point
-                        linesPositions[vertexpos++] = posArray[j * 3];
-                        linesPositions[vertexpos++] = posArray[j * 3 + 1];
-                        linesPositions[vertexpos++] = posArray[j * 3 + 2];
-
-                        // Base Color (Blueish-cyan) multiplied by distance alpha
-                        const r = 0.2 * alpha;
-                        const g = 0.6 * alpha;
-                        const b = 1.0 * alpha;
-
-                        // Start Color
-                        linesColors[colorpos++] = r;
-                        linesColors[colorpos++] = g;
-                        linesColors[colorpos++] = b;
-
-                        // End Color
-                        linesColors[colorpos++] = r;
-                        linesColors[colorpos++] = g;
-                        linesColors[colorpos++] = b;
-
-                        numConnected++;
-                    }
-                }
-            }
-
-            particleGeo.attributes.position.needsUpdate = true;
-
-            // Tell ThreeJS exactly how many lines to draw this frame
-            linesMesh.geometry.setDrawRange(0, numConnected * 2);
-            linesMesh.geometry.attributes.position.needsUpdate = true;
-            linesMesh.geometry.attributes.color.needsUpdate = true;
-
-            // Optional: slight camera float
-            const time = Date.now() * 0.0001;
-            camera.position.x = Math.sin(time) * 100;
-            camera.position.y = Math.cos(time) * 50;
-            camera.lookAt(scene.position);
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        // Responsive resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
     </script>
 </body>
 
