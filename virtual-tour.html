@@ -307,25 +307,25 @@
                     class="bg-gray-800 text-hud-cyan px-2 py-1 rounded">MyModels.unitypackage</code></h3>
 
             <div
-                class="glass-panel p-10 w-full flex flex-col items-center justify-center min-h-[50vh] relative overflow-hidden border-dashed border-2 border-hud-cyan/50">
-                <div class="scanner-line"></div>
-
-                <div class="text-6xl mb-6 object-bounce">📦</div>
-                <h4 class="font-orbitron text-2xl font-bold text-white tracking-widest mb-4">ASSET DETECTED</h4>
-
-                <div class="font-thai text-center text-gray-300 max-w-2xl space-y-4">
-                    <p>ระบบตรวจพบชุดโมเดล AR จากไฟล์ที่กำหนด โมเดล 3
-                        มิติเหล่านี้ใช้สำหรับฉายภาพโฮโลแกรมซ้อนทับชิ้นงานจริง</p>
-                    <p class="text-sm text-hud-cyan/80 bg-hud-cyan/10 p-4 rounded border border-hud-cyan/20">
-                        * เนื่องจากการแสดงผลนี้ทำงานบนเว็บสแตติก (Static Web) ไฟล์ Unity Package จึงไม่สามารถเรนเดอร์ภาพ
-                        3D ได้โดยตรงที่นี่ กรุณาโหลดโมเดลกลับไปใช้ในเอนจิน Unity ของท่าน
-                    </p>
+                class="glass-panel p-2 md:p-6 w-full flex flex-col items-center justify-center min-h-[60vh] relative overflow-hidden border-solid border border-hud-cyan/30">
+                <div class="absolute top-4 left-4 text-hud-cyan font-orbitron text-xs tracking-[0.2em] animate-pulse">
+                    [REC] HOLOGRAM SIMULATION ACTIVE
                 </div>
 
-                <button
-                    class="mt-8 glass-panel py-2 px-6 border-hud-purple/50 text-hud-purple font-bold tracking-widest uppercase hover:bg-hud-purple hover:text-white transition-all">
-                    Download Package [N/A]
-                </button>
+                <!-- 3D Hologram Container -->
+                <div id="hologram-container"
+                    class="w-full h-[50vh] relative z-10 cursor-move rounded-lg overflow-hidden bg-black/40 border border-hud-cyan/10">
+                </div>
+
+                <div class="mt-6 font-thai text-center text-gray-300 max-w-2xl space-y-2 z-10">
+                    <p class="text-lg text-white">แบบจำลองโครงสร้าง 3 มิติ (WebXR Simulation)</p>
+                    <p class="text-sm">จำลองการประมวลผลไฟล์ <code class="text-hud-cyan">MyModels.unitypackage</code>
+                        ผ่านระบบ WebGL</p>
+                    <p
+                        class="text-xs text-hud-purple mt-2 border border-hud-purple/30 inline-block px-3 py-1 rounded bg-hud-purple/10">
+                        * คลิกซ้ายค้างเพื่อหมุนโมเดล | เลื่อนลูกกลิ้งเมาส์เพื่อซูม
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -401,6 +401,7 @@
 
     <!-- Essential Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
         // SPA Simple Router Logic
         document.addEventListener('DOMContentLoaded', () => {
@@ -571,7 +572,129 @@
         };
 
         init3DBackground();
+
+        // ==========================================
+        // 3D Hologram - Interactive Model Viewer
+        // ==========================================
+        const initHologram = () => {
+            const container = document.getElementById('hologram-container');
+            if (!container) return;
+
+            const scene = new THREE.Scene();
+
+            // Camera
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 15);
+
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enablePan = false;
+            controls.minDistance = 5;
+            controls.maxDistance = 30;
+
+            // Geometry - A complex "technological" looking object
+            const coreGeometry = new THREE.IcosahedronGeometry(2, 1);
+            const coreMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00f2ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+            scene.add(coreMesh);
+
+            // Outer rings
+            const ringGeometry1 = new THREE.TorusGeometry(3.5, 0.05, 16, 100);
+            const ringMaterial1 = new THREE.MeshBasicMaterial({ color: 0x7000ff });
+            const ringMesh1 = new THREE.Mesh(ringGeometry1, ringMaterial1);
+            ringMesh1.rotation.x = Math.PI / 2;
+            scene.add(ringMesh1);
+
+            const ringGeometry2 = new THREE.TorusGeometry(4.5, 0.02, 16, 100);
+            const ringMaterial2 = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+            const ringMesh2 = new THREE.Mesh(ringGeometry2, ringMaterial2);
+            scene.add(ringMesh2);
+
+            // Particles around hologram
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 200;
+            const particlePos = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                particlePos[i] = (Math.random() - 0.5) * 12;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+            const particleMat = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0x00f2ff,
+                transparent: true,
+                opacity: 0.6
+            });
+            const particles = new THREE.Points(particleGeo, particleMat);
+            scene.add(particles);
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            // Only animate if the section is visible
+            const hologramSection = document.getElementById('models');
+
+            const animateHologram = () => {
+                requestAnimationFrame(animateHologram);
+
+                // Skip heavy rendering if section isn't active
+                if (!hologramSection.classList.contains('active')) return;
+
+                const elapsedTime = clock.getElapsedTime();
+
+                // Rotate objects
+                coreMesh.rotation.y = elapsedTime * 0.5;
+                coreMesh.rotation.x = elapsedTime * 0.2;
+
+                ringMesh1.rotation.y = elapsedTime * -0.3;
+                ringMesh1.rotation.x = (Math.PI / 2) + Math.sin(elapsedTime * 0.5) * 0.2;
+
+                ringMesh2.rotation.y = elapsedTime * 0.2;
+                ringMesh2.rotation.z = elapsedTime * 0.1;
+
+                particles.rotation.y = elapsedTime * 0.1;
+
+                controls.update();
+                renderer.render(scene, camera);
+            };
+
+            animateHologram();
+
+            // Handle Resize inside container
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            // Re-calc layout when hash changes to this section
+            window.addEventListener('hashchange', () => {
+                if (window.location.hash === '#models') {
+                    setTimeout(() => {
+                        camera.aspect = container.clientWidth / container.clientHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(container.clientWidth, container.clientHeight);
+                    }, 100); // small delay to allow CSS display:flex to apply
+                }
+            });
+        };
+
+        // Initialize when DOM is fully loaded and routing has run
+        setTimeout(initHologram, 500);
     </script>
 </body>
+
 
 </html>
