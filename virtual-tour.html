@@ -320,7 +320,9 @@
                         src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
                     <model-viewer src="./models/textured_mesh_glb.glb" alt="3D Model of Virtual Tour" auto-rotate
                         camera-controls ar shadow-intensity="1" class="w-full h-full outline-none"
-                        style="background-color: transparent; --poster-color: transparent;">
+                        camera-orbit="0deg 75deg 105%" min-camera-orbit="auto auto 40%"
+                        max-camera-orbit="auto auto 150%" min-field-of-view="20deg" max-field-of-view="45deg"
+                        bounds="tight" style="background-color: transparent; --poster-color: transparent;">
                     </model-viewer>
                 </div>
 
