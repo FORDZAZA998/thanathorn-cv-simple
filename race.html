@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oracle Space-bar Race 🏎️</title>
+    <title>Oracle Cartoon Race 🏎️🐱</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <link
@@ -65,8 +65,8 @@
             }
 
             50% {
-                transform: scale(1.1);
-                filter: brightness(1.5);
+                transform: scale(1.2);
+                filter: brightness(1.8);
             }
 
             100% {
@@ -92,20 +92,14 @@
             opacity: 0.3;
         }
 
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
+        .avatar-btn {
+            transition: all 0.3s ease;
         }
 
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-
-            100% {
-                background-position: 200% 0;
-            }
+        .avatar-btn.selected {
+            border-color: #ff5a00;
+            background: rgba(255, 90, 0, 0.2);
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -117,74 +111,138 @@
         <div class="flex items-center gap-3">
             <div
                 class="w-10 h-10 rounded-lg bg-neonOrange flex items-center justify-center shadow-[0_0_15px_rgba(255,90,0,0.5)]">
-                <i class="fas fa-bolt text-white"></i>
+                <i class="fas fa-paw text-white"></i>
             </div>
             <div>
-                <h1 class="font-display font-bold text-xl tracking-tighter">ORACLE RACE</h1>
-                <p class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Space-bar Challenge</p>
+                <h1 class="font-display font-bold text-xl tracking-tighter uppercase">Cartoon Race</h1>
+                <p class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Multiplayer Challenge</p>
             </div>
         </div>
-        <div id="connection-status"
-            class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-bold uppercase tracking-widest">
-            Offline
+        <div class="flex items-center gap-4">
+            <div id="pb-display"
+                class="hidden md:block glass-panel px-3 py-1 rounded-lg text-[10px] text-gray-400 font-mono">
+                PERSONAL BEST: <span id="pb-value" class="text-neonCyan">--.---s</span>
+            </div>
+            <div id="connection-status"
+                class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-bold uppercase tracking-widest">
+                Offline
+            </div>
         </div>
     </header>
 
     <!-- Join Screen -->
     <div id="setup-screen"
-        class="w-full max-w-md glass-panel p-8 rounded-2xl flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        class="w-full max-w-lg glass-panel p-8 rounded-2xl flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div class="text-center">
-            <h2 class="text-2xl font-display font-bold mb-2">เข้าสู่สนามแข่ง</h2>
-            <p class="text-gray-400 text-sm">ใส่ชื่อ Oracle ของคุณเพื่อเริ่มวิ่ง</p>
+            <h2 class="text-2xl font-display font-bold mb-2">เลือกตัวละคร & เข้าสนามแข่ง</h2>
+            <p class="text-gray-400 text-sm">เลือกตัวการ์ตูนที่ถูกใจเพื่อเริ่มประลองความไว</p>
         </div>
-        <input type="text" id="player-name" placeholder="ชื่อ Oracle (เช่น Two Rivers...)"
-            class="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-lg focus:outline-none focus:border-neonOrange transition-all">
-        <div class="flex flex-wrap justify-center gap-3">
-            <button onclick="startGame('#ff5a00')" class="w-12 h-12 rounded-full bg-[#ff5a00]" title="Orange"></button>
-            <button onclick="startGame('#00f2ff')" class="w-12 h-12 rounded-full bg-[#00f2ff]" title="Cyan"></button>
-            <button onclick="startGame('#ff0088')" class="w-12 h-12 rounded-full bg-[#ff0088]" title="Pink"></button>
-            <button onclick="startGame('#aaff00')" class="w-12 h-12 rounded-full bg-[#aaff00]" title="Lime"></button>
+
+        <div class="grid grid-cols-5 gap-3 mb-2">
+            <button onclick="selectAvatar('🐱')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10 selected"
+                data-avatar="🐱">🐱</button>
+            <button onclick="selectAvatar('🐶')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐶">🐶</button>
+            <button onclick="selectAvatar('🦊')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🦊">🦊</button>
+            <button onclick="selectAvatar('🦁')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🦁">🦁</button>
+            <button onclick="selectAvatar('🐰')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐰">🐰</button>
+            <button onclick="selectAvatar('🐵')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐵">🐵</button>
+            <button onclick="selectAvatar('🐸')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐸">🐸</button>
+            <button onclick="selectAvatar('🐷')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐷">🐷</button>
+            <button onclick="selectAvatar('🐼')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🐼">🐼</button>
+            <button onclick="selectAvatar('🤖')"
+                class="avatar-btn h-14 rounded-xl border border-white/10 bg-white/5 text-2xl hover:bg-white/10"
+                data-avatar="🤖">🤖</button>
         </div>
-        <p class="text-[10px] text-gray-500 text-center italic mt-2">MQTT-powered real-time synchronization</p>
+
+        <div class="flex flex-col gap-4">
+            <input type="text" id="player-name" placeholder="ชื่อ Oracle หรือ Nickname..."
+                class="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-lg focus:outline-none focus:border-neonOrange transition-all w-full">
+
+            <button onclick="startGame()"
+                class="w-full py-4 bg-neonOrange rounded-xl font-bold shadow-[0_0_20px_rgba(255,90,0,0.3)] hover:scale-[1.02] transition-transform text-white">
+                เริ่มเข้าสู่สนามแข่ง 🏎️
+            </button>
+        </div>
+
+        <p class="text-[10px] text-gray-500 text-center italic">ระบบจะเก็บสถิติความเร็วสูงสุดไว้บนเบราว์เซอร์ของคุณ</p>
     </div>
 
     <!-- Race Scene -->
     <div id="race-screen" class="hidden w-full max-w-6xl flex flex-col gap-8">
         <!-- Stadium Board -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i
-                            class="fas fa-flag-checkered mr-2"></i> สนามแข่งปัจจุบัน</span>
-                    <span class="text-[10px] text-gray-500 border border-white/5 px-2 py-1 rounded">MQTT:
-                        oracle/race/v1/state</span>
-                </div>
+            <div class="md:col-span-2 flex flex-col gap-6">
+                <div class="glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i
+                                class="fas fa-flag-checkered mr-2 text-neonCyan"></i> ลู่วิ่งแบบ Real-Time</span>
+                        <div class="flex gap-4">
+                            <span id="cpm-display"
+                                class="text-[10px] text-neonOrange font-bold font-mono px-2 py-1 bg-neonOrange/10 rounded border border-neonOrange/20">CPM:
+                                0</span>
+                            <span id="timer-display"
+                                class="text-[10px] text-white font-mono px-2 py-1 bg-white/5 rounded border border-white/10">TIME:
+                                0.00s</span>
+                        </div>
+                    </div>
 
-                <!-- Track -->
-                <div id="track-container" class="space-y-12 py-8 min-h-[300px] relative">
-                    <div class="finish-line"></div>
-                    <!-- Players go here -->
-                </div>
+                    <!-- Track -->
+                    <div id="track-container" class="space-y-12 py-8 min-h-[400px] relative">
+                        <div class="finish-line"></div>
+                        <!-- Players go here -->
+                    </div>
 
-                <div class="mt-4 pt-4 border-t border-white/5 flex justify-center">
-                    <div class="animate-bounce">
-                        <span
-                            class="px-4 py-2 bg-white/5 rounded-full text-xs font-bold text-neonOrange border border-neonOrange/20">
-                            กดปุ่ม SPACE BAR ค้างไว้ หรือ รัวๆ เพื่อวิ่ง!
-                        </span>
+                    <div class="mt-4 pt-4 border-t border-white/5 flex justify-center">
+                        <div class="animate-bounce">
+                            <span
+                                class="px-4 py-2 bg-white/10 rounded-full text-xs font-bold text-neonOrange border border-neonOrange/30">
+                                ⌨️ กดปุ่ม SPACE BAR รัวๆ เพื่อวิ่งออกตัว! // turbo
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Hall of Fame -->
-            <div class="glass-panel p-6 rounded-2xl flex flex-col h-fit">
-                <h3 class="text-sm font-bold text-neonCyan uppercase tracking-widest mb-6"><i
-                        class="fas fa-trophy mr-2"></i> Hall of Fame</h3>
-                <div id="hof-list" class="flex flex-col gap-4">
-                    <div class="text-center py-8 text-gray-600 italic text-xs">กำลังดึงข้อมูลจาก MQTT...</div>
+            <!-- Hall of Fame & Stats -->
+            <div class="flex flex-col gap-6">
+                <!-- Session Records -->
+                <div class="glass-panel p-6 rounded-2xl flex flex-col h-fit">
+                    <h3 class="text-xs font-bold text-neonCyan uppercase tracking-widest mb-6"><i
+                            class="fas fa-trophy mr-2"></i> Hall of Fame (Newest)</h3>
+                    <div id="hof-list" class="flex flex-col gap-4">
+                        <div class="text-center py-8 text-gray-600 italic text-xs">Waiting for MQTT stats...</div>
+                    </div>
                 </div>
-                <div class="mt-8 pt-4 border-t border-white/5 text-[10px] text-gray-500 leading-relaxed italic">
-                    🏆 รางวัลชนะเลิศถูกเก็บไว้ถาวรโดยใช้ MQTT "Retain" Feature จนกว่าจะมีราชาคนใหม่มาแทนที่!
+
+                <div class="glass-panel p-6 rounded-2xl flex flex-col h-fit bg-neonCyan/5 border-neonCyan/20">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-widest mb-4"><i
+                            class="fas fa-medal mr-2 text-yellow-400"></i> สถิติส่วนตัว</h3>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-400">สถิติที่ดีที่สุด (PB)</span>
+                        <span id="stats-pb" class="font-bold text-neonCyan">--.---s</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/5">
+                        <p class="text-[10px] text-gray-500 italic leading-relaxed">
+                            💡 เคล็ดลับ: การกดจังหวะสม่ำเสมอจะช่วยให้คุณทำเวลาได้คงที่กว่าการกดแบบสะเปะสะปะ!
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,52 +250,83 @@
 
     <!-- Win Overlay -->
     <div id="win-overlay"
-        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-        <div class="max-w-md w-full glass-panel p-12 rounded-3xl text-center border-neonOrange bg-neonOrange/5">
-            <div class="text-6xl mb-6">🏆</div>
-            <h2 class="text-4xl font-display font-bold mb-2">ยินดีด้วย!</h2>
-            <p id="winner-info" class="text-lg text-gray-300 mb-8">คุณเป็นผู้ชนะในการแข่งครั้งนี้</p>
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+        <div
+            class="max-w-md w-full glass-panel p-12 rounded-3xl text-center border-neonOrange bg-neonOrange/5 relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neonOrange/20 via-transparent to-transparent">
+            </div>
+            <div id="win-avatar" class="text-8xl mb-6 relative z-10 animate-bounce">🏆</div>
+            <h2 class="text-4xl font-display font-bold mb-2 relative z-10">FINISHED!</h2>
+            <div class="flex justify-center gap-6 mb-8 relative z-10">
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase">Your Time</p>
+                    <p id="win-time" class="text-2xl font-display font-bold text-neonCyan">0.000s</p>
+                </div>
+                <div id="new-pb-badge" class="hidden">
+                    <p class="text-[10px] text-neonOrange uppercase font-bold">New PB!</p>
+                    <p class="text-2xl font-display font-bold text-white">🔥</p>
+                </div>
+            </div>
             <button onclick="resetGame()"
-                class="w-full py-4 bg-neonOrange rounded-xl font-bold shadow-[0_0_20px_rgba(255,90,0,0.3)] hover:scale-105 transition-transform">
-                ลงแข่งอีกครั้ง
+                class="relative z-10 w-full py-4 bg-neonOrange rounded-xl font-bold shadow-[0_0_30px_rgba(255,90,0,0.5)] hover:scale-105 active:scale-95 transition-all text-white">
+                แข่งขันรอบถัดไป 🏎️
             </button>
         </div>
     </div>
 
-    <!-- Background Elements -->
+    <!-- Background Decoration -->
     <div
-        class="fixed bottom-0 left-0 w-full p-6 text-[10px] text-gray-700 font-mono tracking-widest text-center pointer-events-none uppercase">
-        Built with Antigravity Oracle • Real-time Data Streams via MQTT
+        class="fixed bottom-0 left-0 w-full p-6 text-[10px] text-gray-800 font-mono tracking-widest text-center pointer-events-none uppercase">
+        Oracle Racing Engine v2.0 • Interactive Game Experience
     </div>
 
     <script>
-        // --- Game Constants & State ---
+        // --- Constants & Global State ---
         const BROKER = 'wss://broker.emqx.io:8083/mqtt';
-        const BASE_TOPIC = 'oracle/race/v1';
+        const BASE_TOPIC = 'oracle/race/v2'; // Bumped version for new schema
 
         let client = null;
         let myId = 'player_' + Math.random().toString(16).slice(2, 8);
         let myName = '';
+        let myAvatar = '🐱';
         let myColor = '#ff5a00';
+
         let progress = 0;
         let isStarted = false;
         let isWinner = false;
         let remotePlayers = {};
-        let hofData = null;
 
-        const trackContainer = document.getElementById('track-container');
-        const hofList = document.getElementById('hof-list');
-        const setupScreen = document.getElementById('setup-screen');
-        const raceScreen = document.getElementById('race-screen');
-        const connStatus = document.getElementById('connection-status');
+        // Stats
+        let startTime = 0;
+        let finishTime = 0;
+        let lastTapTimes = [];
+        let personalBest = localStorage.getItem('race_pb') ? parseFloat(localStorage.getItem('race_pb')) : Infinity;
 
-        // --- MQTT Logic ---
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (personalBest !== Infinity) {
+                document.getElementById('pb-value').innerText = personalBest.toFixed(3) + 's';
+                document.getElementById('stats-pb').innerText = personalBest.toFixed(3) + 's';
+                document.getElementById('pb-display').classList.remove('hidden');
+            }
+        });
+
+        function selectAvatar(emoji) {
+            myAvatar = emoji;
+            document.querySelectorAll('.avatar-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.avatar === emoji);
+            });
+            // Assign a color based on avatar for legacy support/variety (optional)
+            const colors = ['#ff5a00', '#00f2ff', '#ff0088', '#aaff00', '#ffffff', '#ffff00', '#ff00ff', '#00ff00', '#7700ff', '#ffaa00'];
+            const idx = Array.from(document.querySelectorAll('.avatar-btn')).findIndex(b => b.dataset.avatar === emoji);
+            myColor = colors[idx % colors.length];
+        }
+
         function initMQTT() {
             client = mqtt.connect(BROKER, {
                 clientId: myId,
                 clean: true,
-                connectTimeout: 4000,
-                // Will message: notify others if we disconnect
                 will: {
                     topic: `${BASE_TOPIC}/leave/${myId}`,
                     payload: JSON.stringify({ id: myId }),
@@ -246,86 +335,57 @@
                 }
             });
 
+            const connStatus = document.getElementById('connection-status');
             client.on('connect', () => {
-                connStatus.innerText = 'Connected';
+                connStatus.innerText = 'Online';
                 connStatus.className = 'px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-widest';
-
-                // Subscribe to game topics
                 client.subscribe(`${BASE_TOPIC}/state/+`);
                 client.subscribe(`${BASE_TOPIC}/leave/+`);
                 client.subscribe(`${BASE_TOPIC}/hof`);
             });
 
             client.on('message', (topic, payload) => {
-                const data = JSON.parse(payload.toString());
-
-                if (topic === `${BASE_TOPIC}/hof`) {
-                    updateHOF(data);
-                } else if (topic.startsWith(`${BASE_TOPIC}/state/`)) {
-                    if (data.id !== myId) {
-                        remotePlayers[data.id] = data;
+                try {
+                    const data = JSON.parse(payload.toString());
+                    if (topic === `${BASE_TOPIC}/hof`) {
+                        updateHOF(data);
+                    } else if (topic.startsWith(`${BASE_TOPIC}/state/`)) {
+                        if (data.id !== myId) {
+                            remotePlayers[data.id] = data;
+                            updateTrackUI();
+                        }
+                    } else if (topic.startsWith(`${BASE_TOPIC}/leave/`)) {
+                        delete remotePlayers[data.id];
                         updateTrackUI();
                     }
-                } else if (topic.startsWith(`${BASE_TOPIC}/leave/`)) {
-                    delete remotePlayers[data.id];
-                    updateTrackUI();
+                } catch (e) {
+                    console.error("MQTT Parse Error", e);
                 }
             });
-
-            client.on('error', (err) => console.error('MQTT Error:', err));
         }
 
-        function publishState() {
-            if (!client || !isStarted) return;
-            const state = {
-                id: myId,
-                name: myName,
-                color: myColor,
-                progress: progress,
-                ts: Date.now()
-            };
-            client.publish(`${BASE_TOPIC}/state/${myId}`, JSON.stringify(state));
-        }
-
-        function announceWinner() {
-            if (isWinner) return;
-            isWinner = true;
-
-            const winnerData = {
-                name: myName,
-                time: Date.now(),
-                oracle: myName
-            };
-
-            // PUBLISH WITH RETAIN: TRUE (This is the "No Database" Hack)
-            client.publish(`${BASE_TOPIC}/hof`, JSON.stringify(winnerData), { retain: true, qos: 1 });
-
-            document.getElementById('winner-info').innerText = `${myName} - คุณทำเวลาได้ยอดเยี่ยม!`;
-            document.getElementById('win-overlay').classList.remove('hidden');
-        }
-
-        // --- Game Loop & UI ---
-        function startGame(color) {
+        function startGame() {
             const nameInput = document.getElementById('player-name');
             if (!nameInput.value.trim()) {
-                alert('กรุณาใส่ชื่อ Oracle ของคุณก่อนครับ!');
+                alert('กรุณาใส่ชื่อของคุณก่อนเริ่มครับ!');
                 return;
             }
 
             myName = nameInput.value;
-            myColor = color;
             isStarted = true;
+            startTime = Date.now();
 
-            setupScreen.classList.add('hidden');
-            raceScreen.classList.remove('hidden');
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('race-screen').classList.remove('hidden');
 
             initMQTT();
             updateTrackUI();
 
-            // Auto sync loop
+            // Sync & UI Loops
             setInterval(publishState, 200);
+            setInterval(updateGameStats, 100);
 
-            // Stale player cleanup
+            // Cleanup inactive players
             setInterval(() => {
                 const now = Date.now();
                 Object.keys(remotePlayers).forEach(id => {
@@ -337,46 +397,105 @@
             }, 2000);
         }
 
+        // --- Logic Updates ---
+        function publishState() {
+            if (!client || !isStarted) return;
+            client.publish(`${BASE_TOPIC}/state/${myId}`, JSON.stringify({
+                id: myId,
+                name: myName,
+                avatar: myAvatar,
+                color: myColor,
+                progress: progress,
+                ts: Date.now()
+            }));
+        }
+
+        function updateGameStats() {
+            if (!isStarted || isWinner) return;
+
+            // Timer
+            const elapsed = (Date.now() - startTime) / 1000;
+            document.getElementById('timer-display').innerText = `TIME: ${elapsed.toFixed(2)}s`;
+
+            // CPM (Clicks Per Minute)
+            const now = Date.now();
+            lastTapTimes = lastTapTimes.filter(t => now - t < 10000); // Only keep last 10s
+            const cpm = Math.round((lastTapTimes.length / 10) * 60);
+            document.getElementById('cpm-display').innerText = `CPM: ${cpm}`;
+        }
+
+        function announceWinner() {
+            if (isWinner) return;
+            isWinner = true;
+            finishTime = (Date.now() - startTime) / 1000;
+
+            // Check PB
+            let isNewPb = false;
+            if (finishTime < personalBest) {
+                personalBest = finishTime;
+                localStorage.setItem('race_pb', personalBest);
+                document.getElementById('pb-value').innerText = personalBest.toFixed(3) + 's';
+                document.getElementById('stats-pb').innerText = personalBest.toFixed(3) + 's';
+                isNewPb = true;
+            }
+
+            // Publish HOF
+            client.publish(`${BASE_TOPIC}/hof`, JSON.stringify({
+                name: myName,
+                avatar: myAvatar,
+                time: finishTime,
+                ts: Date.now()
+            }), { retain: true, qos: 1 });
+
+            // Winner UI
+            document.getElementById('win-time').innerText = finishTime.toFixed(3) + 's';
+            document.getElementById('win-avatar').innerText = myAvatar;
+            document.getElementById('new-pb-badge').classList.toggle('hidden', !isNewPb);
+            document.getElementById('win-overlay').classList.remove('hidden');
+        }
+
         function updateTrackUI() {
-            // Combine me and remote players
+            const track = document.getElementById('track-container');
             const allPlayers = [
-                { id: myId, name: myName, color: myColor, progress: progress, isMe: true },
+                { id: myId, name: myName, avatar: myAvatar, color: myColor, progress: progress, isMe: true },
                 ...Object.values(remotePlayers)
             ];
 
-            // Render each lane
-            trackContainer.innerHTML = '';
+            track.innerHTML = '<div class="finish-line"></div>';
             allPlayers.forEach(p => {
                 const lane = document.createElement('div');
-                lane.className = 'w-full relative h-4 bg-white/5 rounded-full mb-10';
+                lane.className = 'w-full relative h-4 bg-white/5 rounded-full mb-12';
                 lane.innerHTML = `
-                    <div class="absolute -top-6 left-0 text-[10px] font-bold ${p.isMe ? 'text-neonOrange' : 'text-gray-500'} uppercase">
-                        ${p.name} ${p.isMe ? '(YOU)' : ''}
+                    <div class="absolute -top-7 left-0 text-[10px] font-bold ${p.isMe ? 'text-neonOrange' : 'text-gray-500'} flex items-center gap-2">
+                        <span class="bg-white/10 px-2 py-0.5 rounded border border-white/5">${p.name}</span>
+                        ${p.isMe ? '<span class="text-neonCyan animate-pulse">YOU</span>' : ''}
                     </div>
                     <div class="track-line absolute top-1/2 -translate-y-1/2"></div>
-                    <div class="player-node absolute top-1/2 -translate-y-1/2 -ml-4" style="left: ${p.progress}%">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transform rotate-45" 
-                             style="background-color: ${p.color}; box-shadow: 0 0 15px ${p.color}88">
-                             <span class="transform -rotate-45 text-white font-bold text-xs">O</span>
+                    <div class="player-node absolute top-1/2 -translate-y-1/2 -ml-6" style="left: ${p.progress}%">
+                        <div class="w-12 h-12 flex items-center justify-center text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-transform duration-75">
+                            ${p.avatar}
                         </div>
-                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[8px] font-mono text-gray-500">${p.progress}%</div>
+                        <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-[9px] text-gray-500">${p.progress.toFixed(1)}%</div>
                     </div>
                 `;
-                trackContainer.appendChild(lane);
+                track.appendChild(lane);
             });
         }
 
         function updateHOF(data) {
-            hofData = data;
-            const dateStr = new Date(data.time).toLocaleString('th-TH');
-            hofList.innerHTML = `
-                <div class="glass-panel p-4 rounded-xl border-neonOrange/30 animate-pulse">
-                    <div class="text-[10px] text-gray-500 uppercase mb-1">👑 Current King</div>
-                    <div class="text-xl font-display font-bold text-white mb-1">${data.name}</div>
-                    <div class="text-[10px] text-neonOrange font-mono">${dateStr}</div>
-                </div>
-                <div class="text-center py-2">
-                   <div class="w-1 h-1 bg-white/20 mx-auto rounded-full"></div>
+            const list = document.getElementById('hof-list');
+            const dateStr = new Date(data.ts).toLocaleTimeString('th-TH');
+            list.innerHTML = `
+                <div class="glass-panel p-5 rounded-xl border-neonCyan/20 flex items-center gap-4 group hover:border-neonCyan/50 transition-colors">
+                    <div class="text-4xl group-hover:scale-110 transition-transform">${data.avatar || '👑'}</div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-neonCyan font-bold uppercase tracking-widest">Global Record Holder</div>
+                        <div class="text-lg font-display font-bold text-white">${data.name}</div>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-[10px] text-white/40 font-mono">${dateStr}</span>
+                            <span class="text-xs font-bold text-neonOrange">${data.time.toFixed(3)}s</span>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -384,25 +503,30 @@
         function resetGame() {
             progress = 0;
             isWinner = false;
+            startTime = Date.now();
+            lastTapTimes = [];
             document.getElementById('win-overlay').classList.add('hidden');
             updateTrackUI();
         }
 
-        // --- Controls ---
+        // --- Controller ---
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && isStarted && !isWinner) {
                 e.preventDefault();
-                progress += 1.5;
+                progress += 1.25;
                 if (progress >= 100) {
                     progress = 100;
                     announceWinner();
                 }
+
+                lastTapTimes.push(Date.now());
                 updateTrackUI();
 
-                // Visual feedback
-                const meNode = trackContainer.querySelector(`.player-node`);
-                if (meNode) meNode.classList.add('tap-active');
-                setTimeout(() => { if (meNode) meNode.classList.remove('tap-active'); }, 100);
+                const meNode = document.querySelector('.player-node');
+                if (meNode) {
+                    meNode.classList.add('tap-active');
+                    setTimeout(() => meNode.classList.remove('tap-active'), 100);
+                }
             }
         });
 
