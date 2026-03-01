@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ธนาธร จึงรุ่งเรืองกิจ - Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Thai', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#050508',
+                        neonOrange: '#FF5A00',
+                        neonCyan: '#06b6d4',
+                        neonBlue: '#3B82F6'
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050508;
+            color: #f3f4f6;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(255, 90, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-nav {
+            background: rgba(5, 5, 8, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 90, 0, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(255, 90, 0, 0.2);
+        }
+
+        /* Futuristic Texts */
+        .text-gradient {
+            background: linear-gradient(135deg, #FF5A00 0%, #ff8a00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #06b6d4 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Animated grid background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 50px 50px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050508;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF5A00;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d1d5db;
+        }
+    </style>
+</head>
+
+<body class="antialiased font-sans flex flex-col min-h-screen">
+
+    <!-- Grid Background -->
+    <div class="grid-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="font-display font-bold text-xl tracking-wider text-white">
+                THANATHORN<span class="text-neonOrange">.</span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide">
+                <a href="#home" class="text-gray-300 hover:text-white transition-colors">หน้าแรก</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">เกี่ยวกับผม</a>
+                <a href="#projects" class="text-gray-300 hover:text-white transition-colors">ผลงาน</a>
+                <a href="#contact" class="text-gray-300 hover:text-white transition-colors">ติดต่อ</a>
+            </div>
+
+            <!-- Link to The Oracle Hub -->
+            <a href="index.html"
+                class="hidden md:flex items-center gap-2 text-xs font-medium border border-white/20 px-4 py-2 rounded-full hover:bg-white/10 transition-colors">
+                <i class="fas fa-cube text-neonCyan"></i>
+                THE ORACLE HUB
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-300 hover:text-white">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 flex flex-col justify-center min-h-[90vh]">
+        <div class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="order-2 md:order-1 space-y-6">
+                <div
+                    class="inline-block px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-neonOrange text-xs font-bold tracking-widest uppercase mb-2">
+                    EXECUTIVE PROFILE & PORTFOLIO
+                </div>
+                <h1 class="text-5xl md:text-7xl font-display font-bold leading-tight">
+                    สวัสดีครับ ผมคือ <br />
+                    <span class="text-gradient">ธนาธร<br />จึงรุ่งเรืองกิจ</span>
+                </h1>
+                <p class="text-gray-400 text-lg md:text-xl font-light max-w-lg leading-relaxed">
+                    ผู้นำทางความคิด นักบริหารระดับแนวหน้า และนักพัฒนาผู้หลงใหลใน Web3, IoT และ Creative Technology
+                </p>
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <a href="#projects"
+                        class="px-6 py-3 bg-neonOrange hover:bg-[#e65000] text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                        ดูผลงานของผม <i class="fas fa-arrow-right text-sm"></i>
+                    </a>
+                    <a href="cv.html"
+                        class="px-6 py-3 glass-card hover:bg-white/10 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                        เปิดดูเรซูเม่ (CV) <i class="fas fa-file-alt text-sm text-gray-400"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="order-1 md:order-2 flex justify-center md:justify-end">
+                <div class="relative w-64 h-64 md:w-96 md:h-96">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-tr from-neonOrange/20 to-neonCyan/20 rounded-full blur-3xl animate-pulse">
+                    </div>
+                    <div
+                        class="absolute inset-2 border border-white/10 rounded-full border-dashed animate-[spin_20s_linear_infinite]">
+                    </div>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Thanathorn_Juangroongruangkit_at_a_meeting_of_the_House_of_Representatives%2C_25_May_2019.jpg"
+                        alt="ธนาธร จึงรุ่งเรืองกิจ"
+                        class="relative z-10 w-full h-full object-cover rounded-full border-4 border-darkBg shadow-[0_0_40px_rgba(255,90,0,0.3)]">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-black/40 border-y border-white/5 relative">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col items-center text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-display font-bold mb-4">เกี่ยวกับผม</h2>
+                <div class="w-16 h-1 bg-neonOrange rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Story -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-semibold text-white">เส้นทางการทำงาน & เทคโนโลยี</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        ผมเป็นผู้บริหารและนักคิดที่เชื่อมั่นในพลังของ <strong>เทคโนโลยีแห่งอนาคต</strong>
+                        นอกเหนือจากการขับเคลื่อนองค์กรธุรกิจระดับประเทศ (ไทยซัมมิท กรุ๊ป) และการเป็นผู้นำทางการเมือง
+                        (พรรคอนาคตใหม่/คณะก้าวหน้า)
+                    </p>
+                    <p class="text-gray-400 leading-relaxed">
+                        ในเวลาว่าง ผมมักจะใช้เวลาศึกษาและพัฒนาโปรเจกต์ดิจิทัล โดยผสานความรู้ด้าน <strong>Web3, IoT,
+                            สถาปัตยกรรมข้อมูล และ Interactive 3D</strong> เพื่อสร้างสรรค์โซลูชันที่โปร่งใส ตรวจสอบได้
+                        และใช้งานได้อย่างคล่องตัว ผมให้ความสำคัญกับการเขียนโค้ดที่สะอาด (Clean Code)
+                        และการออกแบบที่เข้าใจง่าย
+                    </p>
+                </div>
+
+                <!-- Skills -->
+                <div class="glass-card p-8 rounded-2xl">
+                    <h3 class="text-xl font-semibold text-white mb-6"><i class="fas fa-terminal text-neonCyan mr-2"></i>
+                        ทักษะ & ความเชี่ยวชาญทางเทคนิค</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-gray-300">
+                                <span>Frontend & 3D (Three.js / WebGL)</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5 focus:outline-none">
+                                <div class="bg-gradient-to-r from-neonCyan to-blue-500 h-1.5 rounded-full"
+                                    style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-gray-300">
+                                <span>Web3 & Blockchain (Viem.js / Smart Contracts)</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="bg-gradient-to-r from-neonOrange to-yellow-500 h-1.5 rounded-full"
+                                    style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-gray-300">
+                                <span>Data Visualization (Chart.js / Leaflet)</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="bg-gradient-to-r from-neonCyan to-green-500 h-1.5 rounded-full"
+                                    style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-gray-300">
+                                <span>IoT Integration (MQTT / Live Data Streams)</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
+                                    style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-8">
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">HTML5/CSS3</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">TailwindCSS</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">JavaScript (ES6+)</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">Viem.js</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">Three.js</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">Leaflet.js</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">Chart.js</span>
+                        <span class="px-3 py-1 rounded text-xs font-mono skill-tag">Git/Github</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-24 relative">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col items-center text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-display font-bold mb-4">ผลงานที่โดดเด่น</h2>
+                <div class="w-16 h-1 bg-neonCyan rounded-full mb-6"></div>
+                <p class="text-gray-400 max-w-2xl">รวมรวบโปรเจกต์ด้านวิศวกรรมข้อมูลจำลอง, ศิลปะ 3D เชิงพิกัด,
+                    และแดชบอร์ดที่เชื่อมต่อบล็อกเชน</p>
+            </div>
+
+            <!-- Project Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Project 1: FloodBoy -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col">
+                    <div
+                        class="h-48 bg-gray-800 relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1639762681485-074b7f4ec651?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors"></div>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-neonCyan font-bold tracking-widest">
+                            WEB3 / IOT</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-neonCyan transition-colors">
+                            FloodBoy Blockchain Dashboard</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">
+                            แดชบอร์ดติดตามคุณภาพน้ำและสถานะเซ็นเซอร์แบบเรียลไทม์ ดึงข้อมูลตรงจาก Smart Contract บน
+                            JIBCHAIN L1 ผ่าน Viem.js พร้อมระบบ Data Grouping สถิติ</p>
+                        <a href="floodboy-blockchain.html"
+                            class="inline-flex items-center text-sm font-semibold text-neonCyan hover:text-white transition-colors">
+                            เปิดดูโปรเจกต์ 📊 <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 2: DustBoy Hologram -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col">
+                    <div
+                        class="h-48 bg-gray-800 relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors"></div>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-[#00ff88] font-bold tracking-widest">
+                            THREE.JS / MQTT</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff88] transition-colors">
+                            Dustboy Cyberpunk Hologram</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">Dashboard แสดงผลข้อมูลเซนเซอร์ฝุ่น PM2.5 รูปแบบ 3D
+                            Hologram จำลองอนุภาคแบบอินเตอร์แอคทีฟ ดึงข้อมูลผ่าน MQTT แบบ Real-time</p>
+                        <a href="dustboy-3d.html"
+                            class="inline-flex items-center text-sm font-semibold text-[#00ff88] hover:text-white transition-colors">
+                            เปิดดูโปรเจกต์ 🚀 <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 3: 3D Train Map -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col">
+                    <div
+                        class="h-48 bg-gray-800 relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors"></div>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-[#ffaa00] font-bold tracking-widest">
+                            WEBGL / PROCEDURAL</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#ffaa00] transition-colors">3D
+                            Train Interactive Map</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">ระบบจำลองการเดินทางของรถไฟด้วยประสิทธิภาพสูง
+                            (Ultra-Fast) บนกราฟิก WebGL ด้วย Three.js พร้อมภูมิประเทศแบบ Procedural Generation</p>
+                        <a href="travel-3d.html"
+                            class="inline-flex items-center text-sm font-semibold text-[#ffaa00] hover:text-white transition-colors">
+                            เปิดดูโปรเจกต์ 🚄 <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 4: GPS Trace -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col">
+                    <div
+                        class="h-48 bg-gray-800 relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors"></div>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-[#0088ff] font-bold tracking-widest">
+                            LEAFLET / CSV</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#0088ff] transition-colors">
+                            Geospatial Array Map</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">แผนที่ระบบภูมิสารสนเทศ (GIS)
+                            ติดตามพิกัดเส้นทางการเดินทางจากฐานข้อมูล CSV แบบ Animated เส้นทาง
+                            พร้อมระบบหมุดประวัติการแวะพัก</p>
+                        <a href="travel-map.html"
+                            class="inline-flex items-center text-sm font-semibold text-[#0088ff] hover:text-white transition-colors">
+                            เปิดดูโปรเจกต์ 🗺️ <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 5: Oracle Hub (index.html) -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col">
+                    <div class="h-48 bg-gray-800 relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-black to-blue-900/40"></div>
+                        <i
+                            class="fas fa-cube text-5xl text-white/20 relative z-10 group-hover:text-white/40 transition-colors group-hover:scale-110 duration-500"></i>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-white font-bold tracking-widest z-10">
+                            THREE.JS / UI</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">THE
+                            ORACLE - 3D Hub</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">หน้าจอศูนย์รวมโปรเจกต์ (Interactive Data Hub)
+                            แสดงเครือข่ายอนุภาค 3D ที่มีการคำนวณปฏิกิริยาสะท้อนจากเมาส์ (Vector Physics)</p>
+                        <a href="index.html"
+                            class="inline-flex items-center text-sm font-semibold text-white hover:text-blue-400 transition-colors">
+                            เปิดดูโปรเจกต์ 🪐 <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 6: Resume -->
+                <div class="glass-card rounded-2xl overflow-hidden group flex flex-col border border-neonOrange/30">
+                    <div
+                        class="h-48 bg-gray-800 relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center">
+                        <div class="absolute inset-0 bg-black/70 group-hover:bg-black/50 transition-colors"></div>
+                        <div
+                            class="absolute top-4 right-4 bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/10 text-[10px] font-mono text-neonOrange font-bold tracking-widest">
+                            HTML / CSS</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-neonOrange transition-colors">
+                            Executive Resumé / CV</h3>
+                        <p class="text-sm text-gray-400 mb-6 flex-1">เรซูเม่และประวัติการศึกษาส่วนตัวรูปแบบออนไลน์
+                            ดีไซน์ทันสมัยสะอาดตา ที่ครอบคลุมประวัติผู้บริหารและการทำงานระดับชาติ พร้อมระบบพิมพ์</p>
+                        <a href="cv.html"
+                            class="inline-flex items-center text-sm font-semibold text-neonOrange hover:text-white transition-colors">
+                            เปิดดูเรซูเม่ 👤 <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Call To Action (Contact) -->
+    <section id="contact" class="py-24 border-t border-white/5 bg-gradient-to-b from-transparent to-black/80">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-5xl font-display font-bold mb-6">มาทำความรู้จักกัน</h2>
+            <p class="text-gray-400 text-lg mb-10 leading-relaxed font-light">
+                หากคุณมีโปรเจกต์ที่น่าสนใจเกี่ยวกับการใช้ข้อมูล, นวัตกรรมดิจิทัล, หรือกำลังสนใจพันธมิตรร่วมงาน<br
+                    class="hidden md:block" />
+                เพื่อสร้างการเปลี่ยนแปลงในสังคม สามารถพูดคุยกันได้เสมอครับ
+            </p>
+
+            <a href="mailto:thana.th@progressive.th"
+                class="inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-200 font-bold rounded-full transition-colors text-lg shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                <i class="fas fa-envelope"></i> ส่งอีเมลถึงผม
+            </a>
+
+            <div class="flex justify-center gap-6 mt-12 text-gray-500">
+                <a href="#" class="hover:text-white transition-colors text-xl"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-white transition-colors text-xl"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="hover:text-white transition-colors text-xl"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-sm text-gray-600 font-mono border-t border-white/5 bg-black">
+        <p>&copy; 2026 Executive Portfolio. ถักทอด้วยความหลงใหล 💻</p>
+        <p class="text-[10px] mt-2 tracking-widest">POWERED BY ANTIGRAVITY ORACLE</p>
+    </footer>
+
+</body>
+
+</html>
