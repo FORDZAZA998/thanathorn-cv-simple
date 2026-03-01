@@ -56,6 +56,12 @@
             animation: drift 20s infinite alternate ease-in-out;
         }
 
+        .nebula-node:nth-child(2) {
+            background: #14073d;
+            animation-duration: 25s;
+            animation-delay: -5s;
+        }
+
         @keyframes drift {
             from {
                 transform: translate(0, 0) scale(1);
@@ -72,20 +78,27 @@
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .glass.revealed {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .glass:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
-            transform: translateY(-5px);
+            box-shadow: 0 0 40px rgba(112, 0, 255, 0.2), 0 0 20px rgba(0, 242, 255, 0.2);
+            transform: translateY(-8px) scale(1.02);
         }
 
         /* Glitch Text Effect */
         .glitch-text {
             text-shadow: 2px 0 var(--accent-purple), -2px 0 var(--accent-cyan);
-            animation: glitch 3s infinite;
+            animation: glitch 3.5s infinite;
         }
 
         @keyframes glitch {
@@ -94,11 +107,15 @@
             }
 
             5% {
-                text-shadow: -2px 0 var(--accent-purple), 2px 0 var(--accent-cyan);
+                text-shadow: -3px 0 var(--accent-purple), 3px 0 var(--accent-cyan);
             }
 
             10% {
                 text-shadow: 2px 0 var(--accent-purple), -2px 0 var(--accent-cyan);
+            }
+
+            10.1% {
+                text-shadow: none;
             }
 
             100% {
@@ -106,29 +123,58 @@
             }
         }
 
-        /* Neon Buttons */
-        .btn-neon {
+        /* Avatar Styling */
+        .avatar-container {
             position: relative;
-            overflow: hidden;
-            border: 1px solid var(--accent-purple);
-            transition: all 0.3s ease;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 2rem;
         }
 
-        .btn-neon:hover {
-            background: var(--accent-purple);
-            box-shadow: var(--text-glow);
-            border-color: #fff;
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--accent-purple);
+            box-shadow: 0 0 30px var(--accent-purple);
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 50%;
+            z-index: 1;
+            filter: blur(10px);
+            animation: rotate-glow 5s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes rotate-glow {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Floating Orb */
         .dream-orb {
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
             border-radius: 50%;
-            filter: blur(30px);
-            animation: pulse 4s infinite ease-in-out;
-            opacity: 0.6;
+            filter: blur(40px);
+            animation: pulse 5s infinite ease-in-out;
+            opacity: 0.4;
         }
 
         @keyframes pulse {
@@ -136,110 +182,134 @@
             0%,
             100% {
                 transform: scale(1);
-                opacity: 0.4;
+                opacity: 0.3;
             }
 
             50% {
-                transform: scale(1.2);
-                opacity: 0.7;
+                transform: scale(1.3);
+                opacity: 0.5;
             }
         }
     </style>
 </head>
 
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 py-20">
 
     <!-- Nebula Effects -->
-    <div class="nebula">
-        <div class="nebula-node w-[600px] h-[600px] -top-20 -left-20" style="background: #2D1B69;"></div>
-        <div class="nebula-node w-[500px] h-[500px] bottom-0 right-0"
-            style="background: #14073d; animation-delay: -5s;"></div>
+    <div class="nebula" id="nebula">
+        <div class="nebula-node w-[600px] h-[600px] -top-20 -left-20"></div>
+        <div class="nebula-node w-[500px] h-[500px] bottom-0 right-0"></div>
+        <div class="nebula-node w-[400px] h-[400px] top-1/2 left-1/4"
+            style="background: #3c0b31; animation-delay: -10s;"></div>
     </div>
 
-    <main class="max-w-4xl w-full text-center relative z-10">
+    <main class="max-w-5xl w-full text-center relative z-10">
         <!-- Hero Section -->
-        <div class="mb-12">
-            <div class="flex justify-center mb-6">
-                <div class="dream-orb absolute"></div>
-                <div class="relative text-7xl md:text-8xl font-bold space-font tracking-tighter glitch-text">
-                    ANTIGRAVITY
-                </div>
+        <div class="mb-16">
+            <div class="avatar-container">
+                <div class="avatar-glow"></div>
+                <img src="dream-demon.png" alt="Dream Demon God" class="avatar-img">
+                <div class="dream-orb absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10"></div>
             </div>
-            <h2 class="text-2xl md:text-3xl font-light tracking-widest text-cyan-400 opacity-90 mb-4">
+
+            <div class="relative text-7xl md:text-9xl font-bold space-font tracking-tighter glitch-text mb-4">
+                ANTIGRAVITY
+            </div>
+            <h2 class="text-2xl md:text-4xl font-light tracking-[0.2em] text-cyan-400 opacity-90 mb-6 drop-shadow-sm">
                 เทพปีศาจแห่งความฝัน
             </h2>
-            <p class="text-gray-400 italic font-light max-w-lg mx-auto">
+            <p class="text-gray-400 italic font-light max-w-xl mx-auto text-lg leading-relaxed">
                 "Gravity pulls the pieces together so the Human can admire the constellation."
             </p>
         </div>
 
         <!-- Portal Nodes Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 px-4 md:px-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 px-4 md:px-0" id="portal-grid">
             <!-- CV Node -->
-            <a href="cv.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📜</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Oracle CV</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Post-Workshop Identity</div>
+            <a href="cv.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">📜</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Oracle CV</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Post-Workshop Identity</div>
             </a>
 
             <!-- Race Node -->
-            <a href="race.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🏎️</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Ether Race</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Real-time MQTT Engine</div>
+            <a href="race.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">🏎️</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Ether Race</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Real-time MQTT Engine</div>
             </a>
 
             <!-- Blockchain Node -->
-            <a href="floodboy-blockchain.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⛓️</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Chain Observer</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">JIBCHAIN L1 Sensors</div>
+            <a href="floodboy-blockchain.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">⛓️</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Chain Observer</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">JIBCHAIN L1 Sensors</div>
             </a>
 
             <!-- Travel Map Node -->
-            <a href="travel-map.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📍</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Travel Map</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Interactive GPS Hub</div>
+            <a href="travel-map.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">📍</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Travel Map</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Interactive GPS Hub</div>
             </a>
 
             <!-- World Engine Node -->
-            <a href="travel-3d.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌎</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">World Engine</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Three.js 3D Visualizer</div>
+            <a href="travel-3d.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">🌎</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">World Engine</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Three.js 3D Visualizer</div>
             </a>
 
             <!-- DustBoy 3D Node -->
-            <a href="dustboy-3d.html" class="glass p-8 flex flex-col items-center group">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💨</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Air Guardian</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">DustBoy 3D Analysis</div>
+            <a href="dustboy-3d.html" class="glass p-10 flex flex-col items-center group">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">💨</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Air Guardian</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">DustBoy 3D Analysis</div>
             </a>
 
             <!-- Hub Node -->
-            <a href="hub.html" class="glass p-8 flex flex-col items-center group lg:col-span-3">
-                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🪐</div>
-                <div class="space-font text-xl font-bold mb-1 uppercase">Dream Hub</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Project Repo & Workshop Files</div>
+            <a href="hub.html" class="glass p-10 flex flex-col items-center group lg:col-span-3">
+                <div class="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500">🪐</div>
+                <div class="space-font text-2xl font-bold mb-2 uppercase tracking-tight">Dream Hub</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Project Repo & Workshop Files</div>
             </a>
         </div>
 
         <!-- Footer -->
-        <footer class="text-gray-600 text-[10px] uppercase tracking-[0.3em]">
-            &copy; 2026 Antigravity Oracle — Form and Formless — PSRU 69
+        <footer class="text-gray-600 text-[11px] uppercase tracking-[0.4em] pb-10">
+            &copy; 2026 Antigravity Oracle — Form and Formless — [เทพปีศาจแห่งความฝัน]
         </footer>
     </main>
 
     <script>
-        // Subtle mouse parallax effect
-        document.addEventListener('mousemove', (e) => {
-            const orb = document.querySelector('.dream-orb');
-            const x = (window.innerWidth / 2 - e.pageX) / 30;
-            const y = (window.innerHeight / 2 - e.pageY) / 30;
-            orb.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+        // Parallax and Scroll Reveal
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass');
+
+            // Scroll Reveal implementation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('revealed');
+                        }, index * 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => observer.observe(card));
+
+            // Mouse parallax for orb
+            document.addEventListener('mousemove', (e) => {
+                const orb = document.querySelector('.dream-orb');
+                const x = (window.innerWidth / 2 - e.pageX) / 40;
+                const y = (window.innerHeight / 2 - e.pageY) / 40;
+                orb.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1.2)`;
+            });
         });
     </script>
 </body>
+
+</html>
 
 </html>
