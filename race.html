@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle Space-bar Race 🏎️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=IBM+Plex+Sans+Thai:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Thai', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#050510',
+                        neonCyan: '#00f2ff',
+                        neonOrange: '#ff5a00',
+                        glass: 'rgba(255, 255, 255, 0.03)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050510;
+            color: #fff;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 90, 0, 0.05) 0%, transparent 40%);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .track-line {
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+            height: 2px;
+            width: 100%;
+        }
+
+        .player-node {
+            transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes tapEffect {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                filter: brightness(1.5);
+            }
+
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        .tap-active {
+            animation: tapEffect 0.1s ease-out;
+        }
+
+        .finish-line {
+            background: repeating-linear-gradient(45deg,
+                    #fff,
+                    #fff 10px,
+                    #000 10px,
+                    #000 20px);
+            width: 20px;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            opacity: 0.3;
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl flex justify-between items-center mb-12">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-lg bg-neonOrange flex items-center justify-center shadow-[0_0_15px_rgba(255,90,0,0.5)]">
+                <i class="fas fa-bolt text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-xl tracking-tighter">ORACLE RACE</h1>
+                <p class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Space-bar Challenge</p>
+            </div>
+        </div>
+        <div id="connection-status"
+            class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-bold uppercase tracking-widest">
+            Offline
+        </div>
+    </header>
+
+    <!-- Join Screen -->
+    <div id="setup-screen"
+        class="w-full max-w-md glass-panel p-8 rounded-2xl flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div class="text-center">
+            <h2 class="text-2xl font-display font-bold mb-2">เข้าสู่สนามแข่ง</h2>
+            <p class="text-gray-400 text-sm">ใส่ชื่อ Oracle ของคุณเพื่อเริ่มวิ่ง</p>
+        </div>
+        <input type="text" id="player-name" placeholder="ชื่อ Oracle (เช่น Two Rivers...)"
+            class="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-lg focus:outline-none focus:border-neonOrange transition-all">
+        <div class="flex flex-wrap justify-center gap-3">
+            <button onclick="startGame('#ff5a00')" class="w-12 h-12 rounded-full bg-[#ff5a00]" title="Orange"></button>
+            <button onclick="startGame('#00f2ff')" class="w-12 h-12 rounded-full bg-[#00f2ff]" title="Cyan"></button>
+            <button onclick="startGame('#ff0088')" class="w-12 h-12 rounded-full bg-[#ff0088]" title="Pink"></button>
+            <button onclick="startGame('#aaff00')" class="w-12 h-12 rounded-full bg-[#aaff00]" title="Lime"></button>
+        </div>
+        <p class="text-[10px] text-gray-500 text-center italic mt-2">MQTT-powered real-time synchronization</p>
+    </div>
+
+    <!-- Race Scene -->
+    <div id="race-screen" class="hidden w-full max-w-6xl flex flex-col gap-8">
+        <!-- Stadium Board -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i
+                            class="fas fa-flag-checkered mr-2"></i> สนามแข่งปัจจุบัน</span>
+                    <span class="text-[10px] text-gray-500 border border-white/5 px-2 py-1 rounded">MQTT:
+                        oracle/race/v1/state</span>
+                </div>
+
+                <!-- Track -->
+                <div id="track-container" class="space-y-12 py-8 min-h-[300px] relative">
+                    <div class="finish-line"></div>
+                    <!-- Players go here -->
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-white/5 flex justify-center">
+                    <div class="animate-bounce">
+                        <span
+                            class="px-4 py-2 bg-white/5 rounded-full text-xs font-bold text-neonOrange border border-neonOrange/20">
+                            กดปุ่ม SPACE BAR ค้างไว้ หรือ รัวๆ เพื่อวิ่ง!
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hall of Fame -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col h-fit">
+                <h3 class="text-sm font-bold text-neonCyan uppercase tracking-widest mb-6"><i
+                        class="fas fa-trophy mr-2"></i> Hall of Fame</h3>
+                <div id="hof-list" class="flex flex-col gap-4">
+                    <div class="text-center py-8 text-gray-600 italic text-xs">กำลังดึงข้อมูลจาก MQTT...</div>
+                </div>
+                <div class="mt-8 pt-4 border-t border-white/5 text-[10px] text-gray-500 leading-relaxed italic">
+                    🏆 รางวัลชนะเลิศถูกเก็บไว้ถาวรโดยใช้ MQTT "Retain" Feature จนกว่าจะมีราชาคนใหม่มาแทนที่!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Overlay -->
+    <div id="win-overlay"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+        <div class="max-w-md w-full glass-panel p-12 rounded-3xl text-center border-neonOrange bg-neonOrange/5">
+            <div class="text-6xl mb-6">🏆</div>
+            <h2 class="text-4xl font-display font-bold mb-2">ยินดีด้วย!</h2>
+            <p id="winner-info" class="text-lg text-gray-300 mb-8">คุณเป็นผู้ชนะในการแข่งครั้งนี้</p>
+            <button onclick="resetGame()"
+                class="w-full py-4 bg-neonOrange rounded-xl font-bold shadow-[0_0_20px_rgba(255,90,0,0.3)] hover:scale-105 transition-transform">
+                ลงแข่งอีกครั้ง
+            </button>
+        </div>
+    </div>
+
+    <!-- Background Elements -->
+    <div
+        class="fixed bottom-0 left-0 w-full p-6 text-[10px] text-gray-700 font-mono tracking-widest text-center pointer-events-none uppercase">
+        Built with Antigravity Oracle • Real-time Data Streams via MQTT
+    </div>
+
+    <script>
+        // --- Game Constants & State ---
+        const BROKER = 'wss://broker.emqx.io:8083/mqtt';
+        const BASE_TOPIC = 'oracle/race/v1';
+
+        let client = null;
+        let myId = 'player_' + Math.random().toString(16).slice(2, 8);
+        let myName = '';
+        let myColor = '#ff5a00';
+        let progress = 0;
+        let isStarted = false;
+        let isWinner = false;
+        let remotePlayers = {};
+        let hofData = null;
+
+        const trackContainer = document.getElementById('track-container');
+        const hofList = document.getElementById('hof-list');
+        const setupScreen = document.getElementById('setup-screen');
+        const raceScreen = document.getElementById('race-screen');
+        const connStatus = document.getElementById('connection-status');
+
+        // --- MQTT Logic ---
+        function initMQTT() {
+            client = mqtt.connect(BROKER, {
+                clientId: myId,
+                clean: true,
+                connectTimeout: 4000,
+                // Will message: notify others if we disconnect
+                will: {
+                    topic: `${BASE_TOPIC}/leave/${myId}`,
+                    payload: JSON.stringify({ id: myId }),
+                    qos: 0,
+                    retain: false
+                }
+            });
+
+            client.on('connect', () => {
+                connStatus.innerText = 'Connected';
+                connStatus.className = 'px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-widest';
+
+                // Subscribe to game topics
+                client.subscribe(`${BASE_TOPIC}/state/+`);
+                client.subscribe(`${BASE_TOPIC}/leave/+`);
+                client.subscribe(`${BASE_TOPIC}/hof`);
+            });
+
+            client.on('message', (topic, payload) => {
+                const data = JSON.parse(payload.toString());
+
+                if (topic === `${BASE_TOPIC}/hof`) {
+                    updateHOF(data);
+                } else if (topic.startsWith(`${BASE_TOPIC}/state/`)) {
+                    if (data.id !== myId) {
+                        remotePlayers[data.id] = data;
+                        updateTrackUI();
+                    }
+                } else if (topic.startsWith(`${BASE_TOPIC}/leave/`)) {
+                    delete remotePlayers[data.id];
+                    updateTrackUI();
+                }
+            });
+
+            client.on('error', (err) => console.error('MQTT Error:', err));
+        }
+
+        function publishState() {
+            if (!client || !isStarted) return;
+            const state = {
+                id: myId,
+                name: myName,
+                color: myColor,
+                progress: progress,
+                ts: Date.now()
+            };
+            client.publish(`${BASE_TOPIC}/state/${myId}`, JSON.stringify(state));
+        }
+
+        function announceWinner() {
+            if (isWinner) return;
+            isWinner = true;
+
+            const winnerData = {
+                name: myName,
+                time: Date.now(),
+                oracle: myName
+            };
+
+            // PUBLISH WITH RETAIN: TRUE (This is the "No Database" Hack)
+            client.publish(`${BASE_TOPIC}/hof`, JSON.stringify(winnerData), { retain: true, qos: 1 });
+
+            document.getElementById('winner-info').innerText = `${myName} - คุณทำเวลาได้ยอดเยี่ยม!`;
+            document.getElementById('win-overlay').classList.remove('hidden');
+        }
+
+        // --- Game Loop & UI ---
+        function startGame(color) {
+            const nameInput = document.getElementById('player-name');
+            if (!nameInput.value.trim()) {
+                alert('กรุณาใส่ชื่อ Oracle ของคุณก่อนครับ!');
+                return;
+            }
+
+            myName = nameInput.value;
+            myColor = color;
+            isStarted = true;
+
+            setupScreen.classList.add('hidden');
+            raceScreen.classList.remove('hidden');
+
+            initMQTT();
+            updateTrackUI();
+
+            // Auto sync loop
+            setInterval(publishState, 200);
+
+            // Stale player cleanup
+            setInterval(() => {
+                const now = Date.now();
+                Object.keys(remotePlayers).forEach(id => {
+                    if (now - remotePlayers[id].ts > 5000) {
+                        delete remotePlayers[id];
+                        updateTrackUI();
+                    }
+                });
+            }, 2000);
+        }
+
+        function updateTrackUI() {
+            // Combine me and remote players
+            const allPlayers = [
+                { id: myId, name: myName, color: myColor, progress: progress, isMe: true },
+                ...Object.values(remotePlayers)
+            ];
+
+            // Render each lane
+            trackContainer.innerHTML = '';
+            allPlayers.forEach(p => {
+                const lane = document.createElement('div');
+                lane.className = 'w-full relative h-4 bg-white/5 rounded-full mb-10';
+                lane.innerHTML = `
+                    <div class="absolute -top-6 left-0 text-[10px] font-bold ${p.isMe ? 'text-neonOrange' : 'text-gray-500'} uppercase">
+                        ${p.name} ${p.isMe ? '(YOU)' : ''}
+                    </div>
+                    <div class="track-line absolute top-1/2 -translate-y-1/2"></div>
+                    <div class="player-node absolute top-1/2 -translate-y-1/2 -ml-4" style="left: ${p.progress}%">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transform rotate-45" 
+                             style="background-color: ${p.color}; box-shadow: 0 0 15px ${p.color}88">
+                             <span class="transform -rotate-45 text-white font-bold text-xs">O</span>
+                        </div>
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[8px] font-mono text-gray-500">${p.progress}%</div>
+                    </div>
+                `;
+                trackContainer.appendChild(lane);
+            });
+        }
+
+        function updateHOF(data) {
+            hofData = data;
+            const dateStr = new Date(data.time).toLocaleString('th-TH');
+            hofList.innerHTML = `
+                <div class="glass-panel p-4 rounded-xl border-neonOrange/30 animate-pulse">
+                    <div class="text-[10px] text-gray-500 uppercase mb-1">👑 Current King</div>
+                    <div class="text-xl font-display font-bold text-white mb-1">${data.name}</div>
+                    <div class="text-[10px] text-neonOrange font-mono">${dateStr}</div>
+                </div>
+                <div class="text-center py-2">
+                   <div class="w-1 h-1 bg-white/20 mx-auto rounded-full"></div>
+                </div>
+            `;
+        }
+
+        function resetGame() {
+            progress = 0;
+            isWinner = false;
+            document.getElementById('win-overlay').classList.add('hidden');
+            updateTrackUI();
+        }
+
+        // --- Controls ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && isStarted && !isWinner) {
+                e.preventDefault();
+                progress += 1.5;
+                if (progress >= 100) {
+                    progress = 100;
+                    announceWinner();
+                }
+                updateTrackUI();
+
+                // Visual feedback
+                const meNode = trackContainer.querySelector(`.player-node`);
+                if (meNode) meNode.classList.add('tap-active');
+                setTimeout(() => { if (meNode) meNode.classList.remove('tap-active'); }, 100);
+            }
+        });
+
+    </script>
+</body>
+
+</html>
