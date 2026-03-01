@@ -12,6 +12,7 @@
         content="Entry point to the Antigravity ecosystem. Built during the Oracle PSRU Workshop 2026.">
     <meta property="og:image" content="profile.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap"
         rel="stylesheet">
@@ -39,38 +40,14 @@
         }
 
         /* Animated Nebula Background */
-        .nebula {
+        #bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            filter: blur(80px);
-            opacity: 0.5;
-        }
-
-        .nebula-node {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--accent-purple);
-            animation: drift 20s infinite alternate ease-in-out;
-        }
-
-        .nebula-node:nth-child(2) {
-            background: #14073d;
-            animation-duration: 25s;
-            animation-delay: -5s;
-        }
-
-        @keyframes drift {
-            from {
-                transform: translate(0, 0) scale(1);
-            }
-
-            to {
-                transform: translate(10vw, 15vh) scale(1.5);
-            }
+            pointer-events: none;
         }
 
         /* Glassmorphism Card */
@@ -198,12 +175,7 @@
 <body class="flex items-center justify-center min-h-screen p-4 py-20">
 
     <!-- Nebula Effects -->
-    <div class="nebula" id="nebula">
-        <div class="nebula-node w-[600px] h-[600px] -top-20 -left-20"></div>
-        <div class="nebula-node w-[500px] h-[500px] bottom-0 right-0"></div>
-        <div class="nebula-node w-[400px] h-[400px] top-1/2 left-1/4"
-            style="background: #3c0b31; animation-delay: -10s;"></div>
-    </div>
+    <canvas id="bg-canvas"></canvas>
 
     <main class="max-w-5xl w-full text-center relative z-10">
         <!-- Hero Section -->
@@ -310,9 +282,104 @@
                 orb.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1.2)`;
             });
         });
+
+        // 3D Ethereal Background
+        const canvas = document.querySelector('#bg-canvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050214, 0.001);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
+        camera.position.z = 800;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const geometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorsArray = new Float32Array(particlesCount * 3);
+
+        const colorPurple = new THREE.Color(0x7000FF);
+        const colorCyan = new THREE.Color(0x00F2FF);
+        const colorSilver = new THREE.Color(0xE0E0E0);
+
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 3000;
+            posArray[i + 1] = (Math.random() - 0.5) * 3000;
+            posArray[i + 2] = (Math.random() - 0.5) * 2000;
+
+            const rand = Math.random();
+            let c = colorPurple;
+            if (rand > 0.6) c = colorCyan;
+            else if (rand > 0.3) c = colorSilver;
+
+            colorsArray[i] = c.r;
+            colorsArray[i + 1] = c.g;
+            colorsArray[i + 2] = c.b;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+        const createCircleTexture = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            g.addColorStop(0, 'rgba(255,255,255,1)');
+            g.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 32, 32);
+            return new THREE.CanvasTexture(canvas);
+        };
+
+        const material = new THREE.PointsMaterial({
+            size: 10,
+            vertexColors: true,
+            map: createCircleTexture(),
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particlesMesh = new THREE.Points(geometry, material);
+        scene.add(particlesMesh);
+
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+        const halfX = window.innerWidth / 2;
+        const halfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - halfX);
+            mouseY = (e.clientY - halfY);
+        });
+
+        const clock = new THREE.Clock();
+        const tick = () => {
+            const elapsedTime = clock.getElapsedTime();
+            particlesMesh.rotation.y = elapsedTime * 0.05;
+            particlesMesh.rotation.x = elapsedTime * 0.02;
+
+            targetX = mouseX * 0.2;
+            targetY = mouseY * 0.2;
+            camera.position.x += (targetX - camera.position.x) * 0.05;
+            camera.position.y += (-targetY - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(tick);
+        };
+        tick();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
-
-</html>
 
 </html>
