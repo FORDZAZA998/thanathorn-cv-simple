@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -7,18 +7,56 @@
     <title>FloodBoy Blockchain Viewer</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkPanel: '#0F1015',
+                        darkBg: '#050608',
+                        neonBlue: '#3B82F6',
+                        neonGreen: '#10B981',
+                        neonCyan: '#06b6d4'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome for icons -->
+    <!-- Icon set -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background: radial-gradient(circle at top center, #1a1e2d 0%, #050608 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
         }
 
-        .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        .glass-panel {
+            background: rgba(15, 16, 21, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-text-blue {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .glow-text-green {
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         .loading-overlay {
@@ -27,17 +65,18 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(5, 6, 8, 0.8);
+            backdrop-filter: blur(4px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            border-radius: 0.5rem;
+            border-radius: 12px;
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3B82F6;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3B82F6;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -54,127 +93,231 @@
             }
         }
 
-        [v-cloak] {
-            display: none;
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050608;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .stat-label {
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+        }
+
+        /* Table styles */
+        .premium-table th {
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .premium-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .premium-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .metric-name {
+            font-weight: 600;
+            color: #f3f4f6;
+            font-size: 0.85rem;
+        }
+
+        .metric-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
         }
     </style>
 </head>
 
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 flex flex-col items-center">
 
-    <div id="app" class="max-w-6xl mx-auto space-y-6">
-        <!-- Header -->
-        <header class="bg-white rounded-xl p-6 card-shadow relative">
-            <div id="loading-header" class="loading-overlay hidden">
-                <div class="spinner"></div>
+    <div id="app" class="w-full max-w-5xl space-y-6">
+
+        <!-- Top Header Title Area -->
+        <div class="text-center mb-10 mt-4">
+            <div
+                class="inline-block px-3 py-1 rounded-full bg-blue-900/30 border border-blue-500/30 text-neonBlue text-xs font-bold tracking-wider uppercase mb-4 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                JIBCHAIN L1 • CHAIN ID 8899
             </div>
+            <h1 id="store-nickname" class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
+                Loading...</h1>
+            <p id="store-desc" class="text-gray-400 text-sm md:text-base font-light">Connecting to blockchain network...
+            </p>
+            <p class="text-gray-500 text-xs mt-1 font-mono italic">loc: 18.77247, 98.99015</p>
 
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Latest Sensor Data</h1>
-                    <h2 id="store-nickname" class="text-2xl font-semibold text-blue-600 mt-2">Loading...</h2>
-                    <p id="store-desc" class="text-gray-500 mt-1">Connecting to blockchain...</p>
+            <div class="flex justify-center items-center gap-8 mt-6">
+                <div class="text-center">
+                    <div class="stat-label mb-1">Current Block</div>
+                    <div id="current-block" class="stat-value text-neonGreen glow-text-green">-------</div>
                 </div>
-
-                <div class="mt-4 md:mt-0 text-right space-y-1">
-                    <div class="flex items-center justify-end space-x-2">
-                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span id="current-block" class="text-sm font-medium text-gray-700">Current Block: ...</span>
-                    </div>
-                    <div id="last-updated" class="text-sm text-gray-500">Last Updated: ...</div>
-                    <div class="text-sm text-gray-500">
-                        <span id="store-address">0x...</span>
-                        <a id="store-link" href="#" target="_blank" class="text-blue-500 hover:text-blue-700"><i
-                                class="fas fa-external-link-alt ml-1"></i></a>
-                    </div>
+                <div class="text-center">
+                    <div class="stat-label mb-1">Last Updated</div>
+                    <div id="last-updated" class="stat-value text-neonGreen glow-text-green">--:--:--</div>
                 </div>
             </div>
+        </div>
 
-            <!-- Store Selector for Demo -->
-            <div class="mt-4 border-t pt-4 flex space-x-4">
-                <span class="text-sm font-medium text-gray-600 self-center">Select Store:</span>
-                <button onclick="switchStore('0xCd3Ec17ddFDa24f8F97131fa0FDf20e7cbd1A8Bb')"
-                    class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm text-gray-800 transition">FloodBoy001</button>
-                <button onclick="switchStore('0x0994Bc66b2863f8D58C8185b1ed6147895632812')"
-                    class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm text-gray-800 transition">FloodBoy016</button>
-            </div>
-        </header>
+        <!-- Store Selector (Admin / Demo tools) -->
+        <div class="flex justify-center gap-3 mb-6">
+            <button onclick="switchStore('0xCd3Ec17ddFDa24f8F97131fa0FDf20e7cbd1A8Bb')"
+                class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50">FloodBoy001</button>
+            <button onclick="switchStore('0x0994Bc66b2863f8D58C8185b1ed6147895632812')"
+                class="px-4 py-1.5 glass-panel hover:bg-white/5 text-xs text-gray-300 transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50">FloodBoy016</button>
+        </div>
 
-        <!-- Chart Section -->
-        <section class="bg-white rounded-xl p-6 card-shadow relative">
+        <!-- Main Chart Section (Full Width Top) -->
+        <section class="glass-panel p-6 relative">
             <div id="loading-chart" class="loading-overlay hidden">
                 <div class="spinner"></div>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-4">
-                <h3 id="chart-title" class="text-xl font-bold text-gray-800">Water Depth Over Time</h3>
-                <div class="flex space-x-2 mt-4 md:mt-0 bg-gray-100 p-1 rounded-lg">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-darkBg flex items-center justify-center border border-white/5">
+                        <i class="fas fa-chart-line text-neonBlue text-sm"></i>
+                    </div>
+                    <h3 id="chart-title" class="text-lg font-bold text-white tracking-wide">Water Depth Over Time</h3>
+                </div>
+
+                <div class="flex bg-darkBg p-1 rounded border border-white/5 mt-4 md:mt-0">
                     <button id="toggle-water" onclick="toggleChart('waterDepth')"
-                        class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium transition shadow-sm">Water
+                        class="px-4 py-1.5 bg-white/10 text-white rounded text-xs font-semibold transition-all">Water
                         Depth</button>
                     <button id="toggle-battery" onclick="toggleChart('batteryVoltage')"
-                        class="px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md text-sm font-medium transition">Battery
+                        class="px-4 py-1.5 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all">Battery
                         Voltage</button>
                 </div>
             </div>
 
-            <div class="w-full h-[400px]">
+            <div class="w-full h-[350px]">
                 <canvas id="sensorChart"></canvas>
-                <div id="no-data-msg" class="hidden h-full flex items-center justify-center text-gray-500 italic">No
+                <div id="no-data-msg"
+                    class="hidden h-full flex items-center justify-center text-gray-600 italic font-mono text-sm">No
                     historical data available</div>
             </div>
         </section>
 
-        <!-- Data Table Section -->
-        <section class="bg-white rounded-xl p-6 card-shadow relative overflow-hidden">
-            <div id="loading-table" class="loading-overlay hidden">
-                <div class="spinner"></div>
-            </div>
+        <!-- Bottom Grid Layout: 2 Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
 
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Latest Readings</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="p-3 font-semibold text-gray-600">Metric</th>
-                            <th class="p-3 font-semibold text-gray-600">Current</th>
-                            <th class="p-3 font-semibold text-gray-600">Min</th>
-                            <th class="p-3 font-semibold text-gray-600">Max</th>
-                        </tr>
-                    </thead>
-                    <tbody id="data-table-body">
-                        <!-- Data rows injected by JS -->
-                        <tr>
-                            <td colspan="4" class="p-4 text-center text-gray-500">Loading data...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-white rounded-xl p-6 card-shadow text-sm text-gray-500 space-y-2">
-            <div class="flex justify-between items-center flex-wrap gap-2">
-                <div id="footer-updated">Last Updated: ...</div>
-                <div>
-                    Store Owner: <span id="store-owner" class="font-mono">0x...</span>
-                    <a id="owner-link" href="#" target="_blank" class="text-blue-500 hover:text-blue-700 ml-1"><i
-                            class="fas fa-external-link-alt"></i></a>
+            <!-- Left: Data Table -->
+            <section class="glass-panel p-6 relative overflow-hidden">
+                <div id="loading-table" class="loading-overlay hidden">
+                    <div class="spinner"></div>
                 </div>
-            </div>
-            <div class="flex justify-between items-center flex-wrap gap-2">
-                <div>Deployed Block: <a id="deployed-block" href="#" target="_blank"
-                        class="text-blue-500 hover:underline">#...</a></div>
-                <div id="sensor-count">Sensor Count: ...</div>
-            </div>
-        </footer>
+
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded bg-darkBg flex items-center justify-center border border-white/5">
+                        <i class="fas fa-table-list text-neonBlue text-sm"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white tracking-wide">Latest Sensor Data</h3>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left premium-table">
+                        <thead>
+                            <tr>
+                                <th class="p-2 pl-0">Metric</th>
+                                <th class="p-2">Current</th>
+                                <th class="p-2">Min</th>
+                                <th class="p-2 pr-0">Max</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- Data rows injected by JS -->
+                            <tr>
+                                <td colspan="4" class="py-6 text-center text-gray-600 font-mono text-sm">Loading
+                                    telemetry...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right: Store Metadata -->
+            <section class="glass-panel p-6 relative">
+                <div id="loading-meta" class="loading-overlay hidden">
+                    <div class="spinner"></div>
+                </div>
+
+                <div class="flex items-center gap-3 mb-6 justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-darkBg flex items-center justify-center border border-white/5">
+                            <i class="fas fa-fingerprint text-gray-400 text-sm"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white tracking-wide">Store Metadata</h3>
+                    </div>
+                </div>
+
+                <div class="space-y-5 mt-2">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-xs text-gray-500 font-medium tracking-wider uppercase">Store Address</span>
+                        <a id="store-link" href="#" target="_blank"
+                            class="font-mono text-sm text-neonBlue hover:text-blue-400 transition-colors flex items-center gap-2">
+                            <span id="store-address">0x...</span>
+                        </a>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-xs text-gray-500 font-medium tracking-wider uppercase">Owner Address</span>
+                        <a id="owner-link" href="#" target="_blank"
+                            class="font-mono text-sm text-neonBlue hover:text-blue-400 transition-colors">
+                            <span id="store-owner">0x...</span>
+                        </a>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-xs text-gray-500 font-medium tracking-wider uppercase">Deployed Block</span>
+                        <a id="deployed-block" href="#" target="_blank"
+                            class="font-mono text-sm text-gray-300 hover:text-white transition-colors">
+                            #...
+                        </a>
+                    </div>
+                    <div class="flex justify-between items-center pb-2">
+                        <span class="text-xs text-gray-500 font-medium tracking-wider uppercase">Authorized
+                            Sensors</span>
+                        <span id="sensor-count" class="font-mono text-sm text-gray-200">...</span>
+                    </div>
+                </div>
+            </section>
+
+        </div>
     </div>
 
     <!-- Application Logic -->
     <script type="module">
-        import { createPublicClient, http, getContract } from 'https://esm.sh/viem@2.9.11';
+        import { createPublicClient, http } from 'https://esm.sh/viem@2.9.11';
 
-        // ABIs based on provided spec
+        // ABIs
         const FactoryABI = [
             {
                 "name": "getStoreInfo", "inputs": [{ "name": "store", "type": "address" }], "outputs": [
@@ -209,7 +352,7 @@
                     { "indexed": false, "name": "timestamp", "type": "uint256" },
                     { "indexed": false, "name": "values", "type": "int256[]" }
                 ], "name": "RecordStored", "type": "event"
-            } // Added event signature for historical data
+            }
         ];
 
         // JIBCHAIN Setup
@@ -230,47 +373,37 @@
         let chartInstance = null;
         let globalHistoricalData = [];
         let currentFields = [];
-        let activeChartType = 'waterDepth'; // 'waterDepth' or 'batteryVoltage'
+        let activeChartType = 'waterDepth';
 
-        // UI Helpers
+        Chart.defaults.color = '#6b7280';
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+
         const toggleLoader = (id, show) => {
             const el = document.getElementById(id);
-            if (el) {
-                if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
-            }
+            if (el) { if (show) el.classList.remove('hidden'); else el.classList.add('hidden'); }
         };
 
-        const truncateAddress = (addr) => `${addr.substring(0, 6)}...${addr.substring(addr.length - 6)}`;
+        const truncateAddress = (addr) => `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
 
-        const formatTimestamp = (ts) => {
+        const formatTimeOnly = (ts) => {
             const d = new Date(Number(ts));
-            return d.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+            return d.toLocaleTimeString('en-US', { hour12: false });
         };
 
-        // Formatting based strictly on prompt requirements
         function formatFieldName(fieldName) {
             return fieldName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
         }
 
         function processValue(value, unit) {
             if (value === null || value === undefined) return '-';
-
             const baseUnit = unit.replace(/ x\\d+/, '');
-
-            if (unit.includes('x10000')) {
-                return (Number(value) / 10000).toFixed(4) + ' ' + baseUnit;
-            }
-            if (unit.includes('x1000')) {
-                return (Number(value) / 1000).toFixed(3) + ' ' + baseUnit;
-            }
-            if (unit.includes('x100')) {
-                return (Number(value) / 100).toFixed(3) + ' ' + baseUnit;
-            }
-
+            if (unit.includes('x10000')) return (Number(value) / 10000).toFixed(4) + ' ' + baseUnit;
+            if (unit.includes('x1000')) return (Number(value) / 1000).toFixed(3) + ' ' + baseUnit;
+            if (unit.includes('x100')) return (Number(value) / 100).toFixed(3) + ' ' + baseUnit;
             return value + ' ' + baseUnit;
         }
 
-        // Chart Management
+        // Chart.js implementation for dark mode
         function renderChart() {
             const ctx = document.getElementById('sensorChart').getContext('2d');
             const noDataMsg = document.getElementById('no-data-msg');
@@ -287,15 +420,17 @@
             noDataMsg.classList.add('hidden');
 
             const isWater = activeChartType === 'waterDepth';
-            const color = isWater ? '#3B82F6' : '#10B981'; // Blue vs Green
-            const bgGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            bgGradient.addColorStop(0, isWater ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)');
-            bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            const hexColor = isWater ? '#3B82F6' : '#10B981';
+            const rgbColor = isWater ? '59,130,246' : '16,185,129';
+
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, 350);
+            bgGradient.addColorStop(0, `rgba(${rgbColor}, 0.3)`);
+            bgGradient.addColorStop(1, 'rgba(5, 6, 8, 0)');
 
             const dataPoints = globalHistoricalData.map(d => ({
                 x: new Date(d.timestamp),
                 y: isWater ? d.waterDepth : d.batteryVoltage
-            })).filter(d => d.y !== null); // Filter out nulls if field doesn't exist
+            })).filter(d => d.y !== null);
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
@@ -303,14 +438,17 @@
                     datasets: [{
                         label: isWater ? 'Water Depth (m)' : 'Battery Voltage (V)',
                         data: dataPoints,
-                        borderColor: color,
+                        borderColor: hexColor,
                         backgroundColor: bgGradient,
                         borderWidth: 2,
                         pointRadius: 0,
-                        pointHitRadius: 10,
-                        pointHoverRadius: 5,
+                        pointHitRadius: 15,
+                        pointHoverRadius: 4,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: hexColor,
+                        pointHoverBorderWidth: 2,
                         fill: true,
-                        tension: 0.4 // Smoothing curve
+                        tension: 0.3 // Smooth curves
                     }]
                 },
                 options: {
@@ -323,16 +461,17 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(15, 16, 21, 0.9)',
+                            titleColor: '#e2e8f0',
+                            bodyColor: hexColor,
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
                             callbacks: {
                                 label: function (context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += isWater ? context.parsed.y.toFixed(4) : context.parsed.y.toFixed(3);
-                                    }
-                                    return label;
+                                    let val = isWater ? context.parsed.y.toFixed(4) : context.parsed.y.toFixed(3);
+                                    return `${val} ${isWater ? 'm' : 'V'}`;
                                 }
                             }
                         }
@@ -342,13 +481,15 @@
                             type: 'time',
                             time: {
                                 unit: 'hour',
-                                displayFormats: { hour: 'MMM D, h a' }
+                                displayFormats: { hour: 'hA' }
                             },
-                            grid: { display: false }
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: { font: { size: 10 }, maxRotation: 45 }
                         },
                         y: {
                             beginAtZero: false,
-                            grid: { color: '#f3f4f6' }
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: { font: { size: 10 }, padding: 10 }
                         }
                     }
                 }
@@ -357,29 +498,29 @@
 
         window.toggleChart = function (type) {
             activeChartType = type;
-
             const btnW = document.getElementById('toggle-water');
             const btnB = document.getElementById('toggle-battery');
             const title = document.getElementById('chart-title');
+            const icon = document.querySelector('.fa-chart-line');
 
             if (type === 'waterDepth') {
-                btnW.className = "px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium shadow-sm transition";
-                btnB.className = "px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md text-sm font-medium transition";
+                btnW.className = "px-4 py-1.5 bg-white/10 text-white rounded text-xs font-semibold transition-all";
+                btnB.className = "px-4 py-1.5 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all";
                 title.innerText = "Water Depth Over Time";
+                icon.className = "fas fa-chart-line text-neonBlue text-sm";
             } else {
-                btnB.className = "px-4 py-2 bg-green-500 text-white rounded-md text-sm font-medium shadow-sm transition";
-                btnW.className = "px-4 py-2 text-gray-600 hover:text-gray-900 rounded-md text-sm font-medium transition";
+                btnB.className = "px-4 py-1.5 bg-white/10 text-white rounded text-xs font-semibold transition-all";
+                btnW.className = "px-4 py-1.5 text-gray-500 hover:text-gray-300 rounded text-xs font-semibold transition-all";
                 title.innerText = "Battery Voltage Over Time";
+                icon.className = "fas fa-bolt text-neonGreen text-sm";
             }
 
             renderChart();
         };
 
-        // Calculate aggregated min/max from historical data
         function calculateAggregates(valuesIndex) {
             let min = null, max = null;
             let validValues = globalHistoricalData.map(ev => {
-                // events.args.values is int256[]
                 return ev.rawValues ? Number(ev.rawValues[valuesIndex]) : null;
             }).filter(v => v !== null && !isNaN(v));
 
@@ -391,140 +532,132 @@
         }
 
         async function loadData() {
-            ['loading-header', 'loading-chart', 'loading-table'].forEach(id => toggleLoader(id, true));
+            ['loading-meta', 'loading-chart', 'loading-table'].forEach(id => toggleLoader(id, true));
 
             try {
                 // 1. Get Block Number
                 const blockNumber = await client.getBlockNumber();
-                document.getElementById('current-block').innerText = \`Current Block: \${blockNumber}\`;
+                document.getElementById('current-block').innerText = blockNumber.toString();
 
-            // 2. Get Store Info from Factory
-            const factoryResult = await client.readContract({
-                address: FACTORY_ADDRESS, abi: FactoryABI, functionName: 'getStoreInfo', args: [currentStore]
-            });
-            
-            const nickname = factoryResult[0];
-            const owner = factoryResult[1];
-            const sensorCount = factoryResult[2];
-            const deployedBlock = factoryResult[3];
-            const description = factoryResult[4];
+                // 2. Get Store Info from Factory
+                const factoryResult = await client.readContract({
+                    address: FACTORY_ADDRESS, abi: FactoryABI, functionName: 'getStoreInfo', args: [currentStore]
+                });
 
-            // Update UI Header
-            document.getElementById('store-nickname').innerText = nickname;
-            document.getElementById('store-desc').innerText = description;
-            document.getElementById('store-address').innerText = truncateAddress(currentStore);
-            document.getElementById('store-link').href = \`https://exp.jibchain.net/address/\${currentStore}\`;
-            
-            toggleLoader('loading-header', false);
+                const nickname = factoryResult[0];
+                const owner = factoryResult[1];
+                const sensorCount = factoryResult[2];
+                const deployedBlock = factoryResult[3];
+                const description = factoryResult[4];
 
-            // Update UI Footer
-            document.getElementById('store-owner').innerText = truncateAddress(owner);
-            document.getElementById('owner-link').href = \`https://exp.jibchain.net/address/\${owner}\`;
-            document.getElementById('deployed-block').innerText = \`#\${deployedBlock}\`;
-            document.getElementById('deployed-block').href = \`https://exp.jibchain.net/block/\${deployedBlock}\`;
-            document.getElementById('sensor-count').innerText = \`Sensor Count: \${sensorCount} authorized sensor\${sensorCount > 1 ? 's' : ''}\`;
+                // Metadata UI updates
+                document.getElementById('store-nickname').innerText = nickname;
+                document.getElementById('store-desc').innerText = description;
+                document.getElementById('store-address').innerText = truncateAddress(currentStore);
+                document.getElementById('store-link').href = `https://exp.jibchain.net/address/${currentStore}`;
 
-            // 3. Get Subfield Definitions
-            currentFields = await client.readContract({
-                address: currentStore, abi: StoreABI, functionName: 'getAllFields'
-            });
+                document.getElementById('store-owner').innerText = truncateAddress(owner);
+                document.getElementById('owner-link').href = `https://exp.jibchain.net/address/${owner}`;
+                document.getElementById('deployed-block').innerText = `#${deployedBlock}`;
+                document.getElementById('deployed-block').href = `https://exp.jibchain.net/block/${deployedBlock}`;
+                document.getElementById('sensor-count').innerText = sensorCount.toString();
 
-            // 4. Fetch Historical logs (Max past 24 hrs for demo, 28800 blocks)
-            const fromBlock = blockNumber > 28800n ? blockNumber - 28800n : 0n;
-            
-            const historicalEvents = await client.getContractEvents({
-                address: currentStore, abi: StoreABI, eventName: 'RecordStored',
-                fromBlock, toBlock: 'latest', args: { sensor: UNIVERSAL_SIGNER }
-            });
+                toggleLoader('loading-meta', false);
 
-            // Find Indexes
-            const wDepthIdx = currentFields.findIndex(f => f.name.toLowerCase().includes('water_depth') && !f.name.includes('min') && !f.name.includes('max'));
-            const bVoltIdx = currentFields.findIndex(f => f.name.toLowerCase().includes('battery_voltage') && !f.name.includes('min') && !f.name.includes('max'));
+                // 3. Get Subfield Definitions
+                currentFields = await client.readContract({
+                    address: currentStore, abi: StoreABI, functionName: 'getAllFields'
+                });
 
-            globalHistoricalData = historicalEvents.map(event => ({
-                timestamp: Number(event.args.timestamp) * 1000,
-                waterDepth: wDepthIdx >= 0 ? Number(event.args.values[wDepthIdx]) / 10000 : null,
-                batteryVoltage: bVoltIdx >= 0 ? Number(event.args.values[bVoltIdx]) / 100 : null,
-                rawValues: event.args.values // Store raw for min/max agg
-            })).sort((a, b) => a.timestamp - b.timestamp);
+                // 4. Fetch Historical logs
+                const fromBlock = blockNumber > 28800n ? blockNumber - 28800n : 0n;
+                const historicalEvents = await client.getContractEvents({
+                    address: currentStore, abi: StoreABI, eventName: 'RecordStored',
+                    fromBlock, toBlock: 'latest', args: { sensor: UNIVERSAL_SIGNER }
+                });
 
-            renderChart();
-            toggleLoader('loading-chart', false);
+                // Find Indexes
+                const wDepthIdx = currentFields.findIndex(f => f.name.toLowerCase().includes('water_depth') && !f.name.includes('min') && !f.name.includes('max'));
+                const bVoltIdx = currentFields.findIndex(f => f.name.toLowerCase().includes('battery_voltage') && !f.name.includes('min') && !f.name.includes('max'));
 
-            // 5. Get Latest Sensor Data to populate the table base
-            const latestRes = await client.readContract({
-                address: currentStore, abi: StoreABI, functionName: 'getLatestRecord', args: [UNIVERSAL_SIGNER]
-            });
+                globalHistoricalData = historicalEvents.map(event => ({
+                    timestamp: Number(event.args.timestamp) * 1000,
+                    waterDepth: wDepthIdx >= 0 ? Number(event.args.values[wDepthIdx]) / 10000 : null,
+                    batteryVoltage: bVoltIdx >= 0 ? Number(event.args.values[bVoltIdx]) / 100 : null,
+                    rawValues: event.args.values
+                })).sort((a, b) => a.timestamp - b.timestamp);
 
-            const currentTimestamp = formatTimestamp(Number(latestRes[0]) * 1000);
-            document.getElementById('last-updated').innerText = \`Last Updated: \${currentTimestamp}\`;
-            document.getElementById('footer-updated').innerText = \`Last Updated: \${currentTimestamp}\`;
+                renderChart();
+                toggleLoader('loading-chart', false);
 
-            const currentValues = latestRes[1];
-            
-            // Build Table
-            const tbody = document.getElementById('data-table-body');
-            tbody.innerHTML = '';
+                // 5. Get Latest Sensor Data to populate the table base
+                const latestRes = await client.readContract({
+                    address: currentStore, abi: StoreABI, functionName: 'getLatestRecord', args: [UNIVERSAL_SIGNER]
+                });
 
-            currentFields.forEach((field, index) => {
-                // Ignore min/max fields as we calculate them or if they exist just ignore them logically to build clean UI
-                // Standardizing output.
-                if(field.name.toLowerCase().includes('min') || field.name.toLowerCase().includes('max')) return;
-                
-                // Exclude meta fields that aren't measurement data
-                if(field.name.toLowerCase().includes('count')) return;
+                const currentTimestamp = formatTimeOnly(Number(latestRes[0]) * 1000);
+                document.getElementById('last-updated').innerText = currentTimestamp;
 
-                const rawVal = currentValues[index];
-                
-                // Get Aggregates from local historical sweep (acting as data grouping window)
-                const aggs = calculateAggregates(index);
-                const displayMin = aggs.min !== null ? processValue(aggs.min, field.unit) : '-';
-                const displayMax = aggs.max !== null ? processValue(aggs.max, field.unit) : '-';
-                const currentFormatted = processValue(rawVal, field.unit);
-                
-                // Format Field Name 
-                let displayName = formatFieldName(field.name);
-                
-                // Add sample count if it's water depth
-                if (field.name.toLowerCase().includes('water_depth') && aggs.count > 0) {
-                    displayName = \`\${displayName} (\${aggs.count} samples)\`;
-                }
+                const currentValues = latestRes[1];
 
-                const row = document.createElement('tr');
-                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-                row.innerHTML = \`
-                    <td class="p-3 border-b border-gray-100 font-medium text-gray-800">\${displayName}</td>
-                    <td class="p-3 border-b border-gray-100 text-gray-700">\${currentFormatted}</td>
-                    <td class="p-3 border-b border-gray-100 text-gray-500">\${displayMin}</td>
-                    <td class="p-3 border-b border-gray-100 text-gray-500">\${displayMax}</td>
-                \`;
-                tbody.appendChild(row);
-            });
+                // Build Table
+                const tbody = document.getElementById('data-table-body');
+                tbody.innerHTML = '';
 
-            toggleLoader('loading-table', false);
+                currentFields.forEach((field, index) => {
+                    if (field.name.toLowerCase().includes('min') || field.name.toLowerCase().includes('max')) return;
+                    if (field.name.toLowerCase().includes('count')) return;
 
-        } catch (error) {
-            console.error(error);
-            const body = document.getElementById('data-table-body');
-            body.innerHTML = \`<tr><td colspan="4" class="p-4 text-center text-red-500">Error loading data: \${error.message}</td></tr>\`;
-            ['loading-header', 'loading-chart', 'loading-table'].forEach(id => toggleLoader(id, false));
+                    const rawVal = currentValues[index];
+                    const aggs = calculateAggregates(index);
+
+                    const displayMin = aggs.min !== null ? processValue(aggs.min, field.unit) : '-';
+                    const displayMax = aggs.max !== null ? processValue(aggs.max, field.unit) : '-';
+                    const currentFormatted = processValue(rawVal, field.unit);
+
+                    let displayName = formatFieldName(field.name);
+
+                    let sampleBadge = '';
+                    if (field.name.toLowerCase().includes('water_depth') && aggs.count > 0) {
+                        sampleBadge = `<div class="text-[0.6rem] text-gray-500 mt-0.5">${aggs.count} samples</div>`;
+                    }
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td class="p-2 pl-0 align-top">
+                        <div class="metric-name">${displayName}</div>
+                        ${sampleBadge}
+                    </td>
+                    <td class="p-2 align-top"><div class="metric-val">${currentFormatted}</div></td>
+                    <td class="p-2 align-top"><div class="metric-val text-gray-400">${displayMin}</div></td>
+                    <td class="p-2 pr-0 align-top"><div class="metric-val text-gray-400">${displayMax}</div></td>
+                `;
+                    tbody.appendChild(row);
+                });
+
+                toggleLoader('loading-table', false);
+
+            } catch (error) {
+                console.error(error);
+                const tbody = document.getElementById('data-table-body');
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 font-mono text-sm">SYS_ERR: ${error.message}</td></tr>`;
+                ['loading-meta', 'loading-chart', 'loading-table'].forEach(id => toggleLoader(id, false));
+            }
         }
-    }
 
-    // Expose to window for UI usage
-    window.switchStore = (address) => {
-        currentStore = address;
-        loadData();
-    };
+        window.switchStore = (address) => {
+            currentStore = address;
+            // Visual button state update could go here
+            loadData();
+        };
 
-    // Load setup
-    // Chart.js requires time adapter for time axis
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js';
-    script.onload = () => {
-        loadData();
-    };
-    document.head.appendChild(script);
+        // Load setup
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js';
+        script.onload = () => {
+            loadData();
+        };
+        document.head.appendChild(script);
 
     </script>
 </body>
